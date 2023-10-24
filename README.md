@@ -66,7 +66,11 @@ en_US/vctk_low#p330
 
 </td><td>
 
-<audio controls src="wavs/en_US_vctk_p330.wav"></audio>
+[![ttvid]](wavs/en_US_vctk_p330.mov)
+
+[![ttaud]](wavs/en_US_vctk_p330.wav)
+
+<audio controls src="wavs/en_US_vctk_p330.mov"></audio>
 
 </td><td>
 
