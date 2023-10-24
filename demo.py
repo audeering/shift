@@ -7,19 +7,19 @@ import sox
 # /scratch/dkounadis/.envs/.tts/lib/python3.8/site-packages/mimic3_tts/
 
 spk1 = 'en_US/vctk_low#p236'
-rate1 = 1.04
+rate1 = 1.24
 
 spk2 = 'en_UK/apope_low'
 rate2 = 1.64
 
-pitch_semitones =-4
+pitch_semitones = -4
 
 text = ('<speak>'
 '<prosody volume=\'64\'>'
 f'<prosody rate=\'{rate1}\'>'
 f'<voice name=\'{spk1}\'>'
 '<s>'
-'First voice without pitch shifting.'
+'A an exemplary voice.'
 '</s>'
 '</voice>'
 '</prosody>'
@@ -27,7 +27,7 @@ f'<voice name=\'{spk1}\'>'
 f'<prosody rate=\'{rate2}\'>'
 f'<voice name=\'{spk2}\'>'
 '<s>'
-'.Second voice with pitch shifting.'
+'.Another pleasant voice.'
 '</s>'
 '</voice>'
 '</prosody>'
@@ -36,7 +36,7 @@ f'<voice name=\'{spk2}\'>'
 with open('_tmp_ssml.txt', 'w') as f:
     f.write(text)
 
-raw_tts = '_tmp.wav'
+raw_tts = 'test.wav'
 ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > {raw_tts}', shell=True)
 ps.wait()
 
@@ -46,5 +46,5 @@ tfm.pitch(pitch_semitones)
 x_shift = tfm.build_array(
     input_array=x,
     sample_rate_in=fs)
-    
-soundfile.write(f'synthesis_example.wav', x_shift, fs)
+
+soundfile.write(f'test_pitch.wav', x_shift, fs)
