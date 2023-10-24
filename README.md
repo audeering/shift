@@ -66,7 +66,7 @@ en_US/vctk_low#p330
 
 </td><td>
 
- [wavs/en_US_vctk_p330.wav](wavs/en_US_vctk_p330.wav)
+<audio controls=true src="wavs/en_US_vctk_p330.wav"/>
 
 </td><td>
 
