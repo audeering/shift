@@ -27,12 +27,13 @@ Output wav is saved as `synthesis_example.wav`
 
 # Switch Native voice with English TTS
 
-Native video
-##
+Native voice video
 
 [![Native voice ANBPR video](assets/native_video_thumb.png)](https://www.youtube.com/watch?v=tmo2UbKYAqc)
 
-Same video w. Native voice replaced with English TTS
 ##
+
+Same video w. Native voice replaced with English TTS
+
 
 [![Same video w. Native voice replaced with English TTS](assets/tts_video_thumb.png)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
