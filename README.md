@@ -27,15 +27,8 @@ Output wav is saved as `synthesis_example.wav`
 
 # Switch Native voice with English TTS
 
-### original video - native Romanian voice
-
-[![Native voice ANBPR video](https://github.com/audeering/shift/assets/93256324/1b5c01ce-622b-4ba7-bcdb-5551447ab6d0)](https://www.youtube.com/watch?v=tmo2UbKYAqc)
-
-[![Same video w. Native voice replaced with English TTS](https://github.com/audeering/shift/assets/93256324/2bb3ccbf-d4d9-48e9-8979-ba31095da95c)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
-
-github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1
+* Native video
 [![Native voice ANBPR video](assets/native_video_thumb.png)](https://www.youtube.com/watch?v=tmo2UbKYAqc)
 
+* Same video w. Native voice replaced with English TTS
 [![Same video w. Native voice replaced with English TTS](assets/tts_video_thumb.png)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
-
-[![Same video w. Native voice replaced with English TTS](//github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
