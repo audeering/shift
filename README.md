@@ -33,7 +33,7 @@ Native voice video
 
 ##
 
-Same video with Native voice replaced with English TTS voice with similar emotion
+Same video where Native voice is replaced with English TTS voice with similar emotion
 
 
 [![Same video w. Native voice replaced with English TTS](assets/tts_video_thumb.png)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
