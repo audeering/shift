@@ -27,6 +27,13 @@ Output wav is saved as `synthesis_example.wav`
 
 # Native voice replacement with english TTS voice
 
-Example for the ANBPR use case:
-Native original voice video: https://www.youtube.com/watch?v=tmo2UbKYAqc
-Same video with Native voice replaced with english voice: https://www.youtube.com/watch?v=geI1Vqn4QpY
+<table>
+  <tr>
+    <td>
+[![Native voice ANBPR video](https://github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1)](https://www.youtube.com/watch?v=tmo2UbKYAqc)
+    </td>
+    <td>
+[![Same video w. Native voice replaced with English TTS](https://github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
+    </td>
+    </tr>
+</table>
