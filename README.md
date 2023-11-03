@@ -25,15 +25,14 @@ Output wav is saved as `synthesis_example.wav`
 
 <a href="https://audeering.github.io/shift/">Listen to available voices and visualize their emotion!</a>
 
-# Switch Native voice w. English TTS w. equivalent emotion
+# Switch Native voice w. English TTS
 
 ### original video - native Romanian voice
 
-[![Native voice ANBPR video](//github.com/audeering/shift/assets/93256324/1b9e27e1-6a00-480d-a99c-72319b4e6108)](https://www.youtube.com/watch?v=tmo2UbKYAqc)
+[![Native voice ANBPR video](https://github.com/audeering/shift/assets/93256324/1b5c01ce-622b-4ba7-bcdb-5551447ab6d0)](https://www.youtube.com/watch?v=tmo2UbKYAqc)
 
-[<img src="//github.com/audeering/shift/assets/93256324/1b9e27e1-6a00-480d-a99c-72319b4e6108" alt="N2" width="200"/>](https://www.youtube.com/watch?v=tmo2UbKYAqc)
+![Screenshot from 2023-11-03 12-20-29_RSZ](https://github.com/audeering/shift/assets/93256324/2bb3ccbf-d4d9-48e9-8979-ba31095da95c)
+![Screenshot from 2023-11-03 11-49-15_RSZ](https://github.com/audeering/shift/assets/93256324/1b5c01ce-622b-4ba7-bcdb-5551447ab6d0)
 
-## Enhanced video - english TTS voice
-[![Same video w. Native voice replaced with English TTS](//github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
+[![Same video w. Native voice replaced with English TTS](https://github.com/audeering/shift/assets/93256324/2bb3ccbf-d4d9-48e9-8979-ba31095da95c)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
 
-[<img src="//github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1" alt="NTTS" width="200"/>](https://www.youtube.com/watch?v=geI1Vqn4QpY)
