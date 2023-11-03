@@ -30,10 +30,10 @@ Output wav is saved as `synthesis_example.wav`
 <table>
   <tr>
     <td>
-[![Native voice ANBPR video](https://github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1)](https://www.youtube.com/watch?v=tmo2UbKYAqc)
+[![Native voice ANBPR video](https://github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1)](https://www.youtube.com/watch?v=tmo2UbKYAqc "Native voice ANBPR video")
     </td>
     <td>
-[![Same video w. Native voice replaced with English TTS](https://github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
+[![Same video w. Native voice replaced with English TTS](https://github.com/audeering/shift/assets/93256324/40cdf146-8a6f-48f5-94d6-75df0d2ca8a1)](https://www.youtube.com/watch?v=geI1Vqn4QpY "Same video w. Native voice replaced with English TTS")
     </td>
     </tr>
 </table>
