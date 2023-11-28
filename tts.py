@@ -135,21 +135,9 @@ def build_ssml(text):
         _s += '</voice>'
         _s += '</prosody>'
         _s += '</prosody>'
-
-    # # ========================= DIFFERENT SENTECE WITH MOD RATE
-    # f'<prosody rate=\'{rate2}\'>'
-    # f'<voice name=\'{spk2}\'>'
-    # '<s>'
-    # '.Another pleasant voice.'
-    # '</s>'
-    # '</voice>'
-    # '</prosody>'
-
     _s += '</speak>'
-
     with open('_tmp_ssml.txt', 'w') as f:
         f.write(_s)
-
 
 
 def find_nearest_voice(sentiment):
