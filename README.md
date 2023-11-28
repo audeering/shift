@@ -11,10 +11,18 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-Demo
+Use
 
-```
-python demo.py
+```python
+
+# TTS
+python tts.py --text sample.txt
+
+# TTS - voice selection - Available Voices
+python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann"
+
+# TTS - clone native voice's emotion
+python tts.py --text sample.txt --native_voice assets/native_voice.wav
 ```
 
 Output wav is saved as `synthesis_example.wav`
@@ -37,3 +45,8 @@ Same video where Native voice is replaced with English TTS voice with similar em
 
 
 [![Same video w. Native voice replaced with English TTS](assets/tts_video_thumb.png)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
+
+
+## Review demo - SHIFT
+
+https://www.youtube.com/watch?v=bpt7rOBENcQ

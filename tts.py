@@ -118,9 +118,9 @@ def split_into_sentences(text):
 
 
 def build_ssml(text):
-    spk = find_nearest_voice(text['sentiment'])
+    spk = text['voice']
     _s = '<speak>'
-    for sentence in split_into_sentences(text['content']):
+    for sentence in split_into_sentences(text['text']):
         rate = min(max(.87, len(sentence) / 76), 1.14) #1.44)  # 1.24 for bieber
         # print('\n__=__\n', sentence, '\n__=__\n')
         print(rate, len(sentence) / 76)
@@ -179,31 +179,38 @@ def find_nearest_voice(sentiment):
 
 
 def main(args):
-    sess = start_emotion_inference_session()
+    # SELECT TTS VOICE
+    if args.native is not None:
+        sess = start_emotion_inference_session()
 
-    x, fs = soundfile.read(args.native_voice)
-    x = x[:, 0]  # only need mono
-    x = audresample.resample(x.astype(np.float32),
-                                         16000,
-                                         fs)  # - Emotion Recognition needs 16kHz
+        x, fs = soundfile.read(args.native)
+        x = x[:, 0]  # only need mono
+        x = audresample.resample(x.astype(np.float32),
+                                             16000,
+                                             fs)  # - Emotion Recognition needs 16kHz
 
-    print(f'recognizing emotion from wav={args.native_voice} ..')
+        print(f'recognizing emotion from wav={args.native} ..')
 
-    valence = sess.run(['hidden_states', 'logits'], {'signal': x})[1][0, 2]
-    # [1][2]
+        sentiment = sess.run(['hidden_states', 'logits'], {'signal': x})[1][0, 2]
+        # [1][2]
 
-    print(valence, '\n')
+        voice = find_nearest_voice(sentiment)
+        print(sentiment, voice, '\n')
+    else:
+        voice = args.voice
 
-    text = {'content': ('Knjаževаc, a small town in Serbia, has a rich history dating back to the prehistoric era.'
-                   'The town was inhabited by various tribes, including the Triballi, Moesi, Thracians, and Timachi.'
-                   'In the 1st century AD, the Romans conquered the region, and during the Migration Period,'
-                   'the Avars, Huns, and Slavs passed through,'
-                   ),
-        'sentiment': valence}  # valence used as sentiment
+    
+    # = LOAD TEXT
+    with open(args.text, 'r') as f:
+        text = ''.join(f)
 
+    print(text, f'\n\n\n\nFROM {args.text=}')
+
+    text = {'voice': voice,
+            'text': text}
 
     build_ssml(text)
-    raw_tts = 'emocloned_example.wav'
+    raw_tts = 'synthesized.wav'
     ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > {raw_tts}', shell=True)
     ps.wait()
 
@@ -221,20 +228,23 @@ def command_line_args():
         type=str,
         default='cpu',
     )
-
     parser.add_argument(
-        '--native_voice',
-        help="wav (~4 seconds) used to detect emotion, to choose optimal TTS voice",
-        default='assets/native_voice_FOR_EMOTION_CLONING.wav',
+        '--text',
+        help="Text to be synthesized.",
+        default='sample.txt',
         type=str,
     )
-
     parser.add_argument(
-        '--few_classes',
-        help="set if scene prediction is done without sound event prediction",
-        action='store_true',
+        '--native',
+        help="wav from which to find emotion and automatically choose best TTS voice.",
+        type=str,
     )
-
+    parser.add_argument(
+        '--voice',
+        help="TTS voice - Available voices: https://audeering.github.io/shift/",
+        default='en_US/cmu-arctic_low#lnh',
+        type=str,
+    )
     return parser
 
 
