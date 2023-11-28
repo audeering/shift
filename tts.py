@@ -210,7 +210,7 @@ def main(args):
             'text': text}
 
     build_ssml(text)
-    raw_tts = 'synthesized.wav'
+    raw_tts = 'out.wav'
     ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > {raw_tts}', shell=True)
     ps.wait()
 

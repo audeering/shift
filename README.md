@@ -1,8 +1,8 @@
 # Shift TTS System
 
-Affective Speech Synthesis via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/)
+Affective Speech Synthesis via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) and [Speech emotion recognition](https://github.com/audeering/w2v2-how-to).
 
-Install
+### Installation
 
 ```
 virtualenv --python=python3 ~/.envs/.my_env
@@ -11,7 +11,7 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-Use
+### Use
 
 ```python
 
@@ -25,7 +25,7 @@ python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann"
 python tts.py --text sample.txt --native_voice assets/native_voice.wav
 ```
 
-Output wav is saved as `synthesis_example.wav`
+Output wav is saved as `out.wav`
 
 ##
 
