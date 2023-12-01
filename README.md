@@ -51,9 +51,9 @@ Same video where Native voice is replaced with English TTS voice with similar em
 
 https://www.youtube.com/watch?v=bpt7rOBENcQ
 
-Generate your own dubbed video:
+Generate dubbed video:
 
 ```python
-python video_dub.py
+python video_dubbing.py  # generate dubbed video from native video & subtitles
 
 ```
