@@ -50,3 +50,10 @@ Same video where Native voice is replaced with English TTS voice with similar em
 ## Review demo - SHIFT
 
 https://www.youtube.com/watch?v=bpt7rOBENcQ
+
+Generate your own dubbed video:
+
+```python
+python video_dub.py
+
+```
