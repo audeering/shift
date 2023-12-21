@@ -57,3 +57,15 @@ Generate dubbed video:
 python video_dubbing.py  # generate dubbed video from native video & subtitles
 
 ```
+
+
+# Joint Application of D3.1 & D3.2
+
+Provided by an image with textual captions, create a video with TTS saying the captions:
+
+```python
+
+python image_to_speech.py
+```
+
+[![Captions To Video](assets/caption_to_video_thumb.png)](https://youtu.be/wWC8DpOKVvQ)
