@@ -49,7 +49,7 @@ Same video where Native voice is replaced with English TTS voice with similar em
 
 ## Review demo - SHIFT
 
-https://www.youtube.com/watch?v=bpt7rOBENcQ
+[![Review demo SHIFT](assets/review_demo_thumb.png)](https://www.youtube.com/watch?v=bpt7rOBENcQ)
 
 Generate dubbed video:
 
@@ -59,13 +59,13 @@ python video_dubbing.py  # generate dubbed video from native video & subtitles
 ```
 
 
-# Joint Application of D3.1 & D3.2
+## Joint Application of D3.1 & D3.2
 
-Provided by an image with textual captions, create a video with TTS saying the captions:
+[![Captions To Video](assets/caption_to_video_thumb.png)](https://youtu.be/wWC8DpOKVvQ)
+
+From an image with caption(s) create a video:
 
 ```python
 
 python image_to_speech.py
 ```
-
-[![Captions To Video](assets/caption_to_video_thumb.png)](https://youtu.be/wWC8DpOKVvQ)
