@@ -53,10 +53,13 @@ Same video where Native voice is replaced with English TTS voice with similar em
 
 Generate dubbed video:
 
+
 ```python
 python video_dubbing.py  # generate dubbed video from native video & subtitles
 
 ```
+
+Updating to styleTTS2 using this repo [StyleTTS2](https://github.com/yl4579/StyleTTS2)
 
 
 ## Joint Application of D3.1 & D3.2
