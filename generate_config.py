@@ -2,6 +2,9 @@
 # 2. update_config_with_emotion_centroid.py
 # 3. voice_table.py -> Update REadme
 
+# AGENT
+# https://serverfault.com/questions/672346/straight-forward-way-to-run-ssh-agent-and-ssh-add-on-login-via-ssh
+
 
 # 1. generate voices.json (without emotion ) - very fast
 import json
