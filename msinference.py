@@ -28,7 +28,38 @@ from nltk.tokenize import word_tokenize
 
 from models import *
 from utils import *
-from text_utils import TextCleaner
+# from text_utils import TextCleaner
+
+
+# IPA Phonemizer: https://github.com/bootphon/phonemizer
+
+_pad = "$"
+_punctuation = ';:,.!?¡¿—…"«»“” '
+_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+_letters_ipa = "ɑɐɒæɓʙβɔɕçɗɖðʤəɘɚɛɜɝɞɟʄɡɠɢʛɦɧħɥʜɨɪʝɭɬɫɮʟɱɯɰŋɳɲɴøɵɸθœɶʘɹɺɾɻʀʁɽʂʃʈʧʉʊʋⱱʌɣɤʍχʎʏʑʐʒʔʡʕʢǀǁǂǃˈˌːˑʼʴʰʱʲʷˠˤ˞↓↑→↗↘'̩'ᵻ"
+
+# Export all symbols:
+symbols = [_pad] + list(_punctuation) + list(_letters) + list(_letters_ipa)
+
+dicts = {}
+for i in range(len((symbols))):
+    dicts[symbols[i]] = i
+
+class TextCleaner:
+    def __init__(self, dummy=None):
+        self.word_index_dictionary = dicts
+        print(len(dicts))
+    def __call__(self, text):
+        indexes = []
+        for char in text:
+            try:
+                indexes.append(self.word_index_dictionary[char])
+            except KeyError:
+                print('CLEAN', text)
+        return indexes
+
+
+
 textclenaer = TextCleaner()
 
 
@@ -129,11 +160,15 @@ sampler = DiffusionSampler(
 def inference(text, ref_s, alpha = 0.3, beta = 0.7, diffusion_steps=5, embedding_scale=1, use_gruut=False):
     text = text.strip()
     ps = global_phonemizer.phonemize([text])
+    # print(f'PHONEMIZER: {ps=}\n\n') PHONEMIZER: ps=['ɐbˈɛbæbləm ']
     ps = word_tokenize(ps[0])
+    # print(f'TOKENIZER: {ps=}\n\n') OKENIZER: ps=['ɐbˈɛbæbləm']
     ps = ' '.join(ps)
     tokens = textclenaer(ps)
+    # print(f'TEXTCLEAN: {ps=}\n\n') TEXTCLEAN: ps='ɐbˈɛbæbləm'
     tokens.insert(0, 0)
     tokens = torch.LongTensor(tokens).to(device).unsqueeze(0)
+    print(f'TOKENSFINAL: {ps=}\n\n')
 
     with torch.no_grad():
         input_lengths = torch.LongTensor([tokens.shape[-1]]).to(device)
@@ -142,173 +177,15 @@ def inference(text, ref_s, alpha = 0.3, beta = 0.7, diffusion_steps=5, embedding
         t_en = model.text_encoder(tokens, input_lengths, text_mask)
         bert_dur = model.bert(tokens, attention_mask=(~text_mask).int())
         d_en = model.bert_encoder(bert_dur).transpose(-1, -2)
+        # print('BERTdu', bert_dur.shape, tokens.shape, '\n') # bert what is the 768 per token -> IS USED in sampler
+        # BERTdu torch.Size([1, 11, 768]) torch.Size([1, 11])
 
         s_pred = sampler(noise = torch.randn((1, 256)).unsqueeze(1).to(device),
                                           embedding=bert_dur,
                                           embedding_scale=embedding_scale,
                                             features=ref_s, # reference from the same speaker as the embedding
                                              num_steps=diffusion_steps).squeeze(1)
-
-
-        s = s_pred[:, 128:]
-        ref = s_pred[:, :128]
-
-        ref = alpha * ref + (1 - alpha)  * ref_s[:, :128]
-        s = beta * s + (1 - beta)  * ref_s[:, 128:]
-
-        d = model.predictor.text_encoder(d_en,
-                                         s, input_lengths, text_mask)
-
-        x, _ = model.predictor.lstm(d)
-        duration = model.predictor.duration_proj(x)
-
-        duration = torch.sigmoid(duration).sum(axis=-1)
-        pred_dur = torch.round(duration.squeeze()).clamp(min=1)
-
-
-        pred_aln_trg = torch.zeros(input_lengths, int(pred_dur.sum().data))
-        c_frame = 0
-        for i in range(pred_aln_trg.size(0)):
-            pred_aln_trg[i, c_frame:c_frame + int(pred_dur[i].data)] = 1
-            c_frame += int(pred_dur[i].data)
-
-        # encode prosody
-        en = (d.transpose(-1, -2) @ pred_aln_trg.unsqueeze(0).to(device))
-        if model_params.decoder.type == "hifigan":
-            asr_new = torch.zeros_like(en)
-            asr_new[:, :, 0] = en[:, :, 0]
-            asr_new[:, :, 1:] = en[:, :, 0:-1]
-            en = asr_new
-
-        F0_pred, N_pred = model.predictor.F0Ntrain(en, s)
-
-        asr = (t_en @ pred_aln_trg.unsqueeze(0).to(device))
-        if model_params.decoder.type == "hifigan":
-            asr_new = torch.zeros_like(asr)
-            asr_new[:, :, 0] = asr[:, :, 0]
-            asr_new[:, :, 1:] = asr[:, :, 0:-1]
-            asr = asr_new
-
-        out = model.decoder(asr,
-                                F0_pred, N_pred, ref.squeeze().unsqueeze(0))
-
-
-    return out.squeeze().cpu().numpy()[..., :-50] # weird pulse at the end of the model, need to be fixed later
-
-def LFinference(text, s_prev, ref_s, alpha = 0.3, beta = 0.7, t = 0.7, diffusion_steps=5, embedding_scale=1, use_gruut=False):
-    text = text.strip()
-    ps = global_phonemizer.phonemize([text])
-    ps = word_tokenize(ps[0])
-    ps = ' '.join(ps)
-    ps = ps.replace('``', '"')
-    ps = ps.replace("''", '"')
-
-    tokens = textclenaer(ps)
-    tokens.insert(0, 0)
-    tokens = torch.LongTensor(tokens).to(device).unsqueeze(0)
-
-    with torch.no_grad():
-        input_lengths = torch.LongTensor([tokens.shape[-1]]).to(device)
-        text_mask = length_to_mask(input_lengths).to(device)
-
-        t_en = model.text_encoder(tokens, input_lengths, text_mask)
-        bert_dur = model.bert(tokens, attention_mask=(~text_mask).int())
-        d_en = model.bert_encoder(bert_dur).transpose(-1, -2)
-
-        s_pred = sampler(noise = torch.randn((1, 256)).unsqueeze(1).to(device),
-                                        embedding=bert_dur,
-                                        embedding_scale=embedding_scale,
-                                            features=ref_s, # reference from the same speaker as the embedding
-                                            num_steps=diffusion_steps).squeeze(1)
-
-        if s_prev is not None:
-            # convex combination of previous and current style
-            s_pred = t * s_prev + (1 - t) * s_pred
-
-        s = s_pred[:, 128:]
-        ref = s_pred[:, :128]
-
-        ref = alpha * ref + (1 - alpha)  * ref_s[:, :128]
-        s = beta * s + (1 - beta)  * ref_s[:, 128:]
-
-        s_pred = torch.cat([ref, s], dim=-1)
-
-        d = model.predictor.text_encoder(d_en,
-                                        s, input_lengths, text_mask)
-
-        x, _ = model.predictor.lstm(d)
-        duration = model.predictor.duration_proj(x)
-
-        duration = torch.sigmoid(duration).sum(axis=-1)
-        pred_dur = torch.round(duration.squeeze()).clamp(min=1)
-
-
-        pred_aln_trg = torch.zeros(input_lengths, int(pred_dur.sum().data))
-        c_frame = 0
-        for i in range(pred_aln_trg.size(0)):
-            pred_aln_trg[i, c_frame:c_frame + int(pred_dur[i].data)] = 1
-            c_frame += int(pred_dur[i].data)
-
-        # encode prosody
-        en = (d.transpose(-1, -2) @ pred_aln_trg.unsqueeze(0).to(device))
-        if model_params.decoder.type == "hifigan":
-            asr_new = torch.zeros_like(en)
-            asr_new[:, :, 0] = en[:, :, 0]
-            asr_new[:, :, 1:] = en[:, :, 0:-1]
-            en = asr_new
-
-        F0_pred, N_pred = model.predictor.F0Ntrain(en, s)
-
-        asr = (t_en @ pred_aln_trg.unsqueeze(0).to(device))
-        if model_params.decoder.type == "hifigan":
-            asr_new = torch.zeros_like(asr)
-            asr_new[:, :, 0] = asr[:, :, 0]
-            asr_new[:, :, 1:] = asr[:, :, 0:-1]
-            asr = asr_new
-
-        out = model.decoder(asr,
-                                F0_pred, N_pred, ref.squeeze().unsqueeze(0))
-
-
-    return out.squeeze().cpu().numpy()[..., :-100], s_pred # weird pulse at the end of the model, need to be fixed later
-
-def STinference(text, ref_s, ref_text, alpha = 0.3, beta = 0.7, diffusion_steps=5, embedding_scale=1, use_gruut=False):
-    text = text.strip()
-    ps = global_phonemizer.phonemize([text])
-    ps = word_tokenize(ps[0])
-    ps = ' '.join(ps)
-
-    tokens = textclenaer(ps)
-    tokens.insert(0, 0)
-    tokens = torch.LongTensor(tokens).to(device).unsqueeze(0)
-
-    ref_text = ref_text.strip()
-    ps = global_phonemizer.phonemize([ref_text])
-    ps = word_tokenize(ps[0])
-    ps = ' '.join(ps)
-
-    ref_tokens = textclenaer(ps)
-    ref_tokens.insert(0, 0)
-    ref_tokens = torch.LongTensor(ref_tokens).to(device).unsqueeze(0)
-
-
-    with torch.no_grad():
-        input_lengths = torch.LongTensor([tokens.shape[-1]]).to(device)
-        text_mask = length_to_mask(input_lengths).to(device)
-
-        t_en = model.text_encoder(tokens, input_lengths, text_mask)
-        bert_dur = model.bert(tokens, attention_mask=(~text_mask).int())
-        d_en = model.bert_encoder(bert_dur).transpose(-1, -2)
-
-        ref_input_lengths = torch.LongTensor([ref_tokens.shape[-1]]).to(device)
-        ref_text_mask = length_to_mask(ref_input_lengths).to(device)
-        ref_bert_dur = model.bert(ref_tokens, attention_mask=(~ref_text_mask).int())
-        s_pred = sampler(noise = torch.randn((1, 256)).unsqueeze(1).to(device),
-                                          embedding=bert_dur,
-                                          embedding_scale=embedding_scale,
-                                            features=ref_s, # reference from the same speaker as the embedding
-                                             num_steps=diffusion_steps).squeeze(1)
-
+     
 
         s = s_pred[:, 128:]
         ref = s_pred[:, :128]
