@@ -679,7 +679,7 @@ y = pd.read_json(GLOBAL_FILE)['voices']
 
 # == markdown table
 
-y = sorted(y, key=lambda d: d['emotion'][1])  # sort wav_files by valence
+y = sorted(y, key=lambda d: d['emotion'][0])  # sort wav_files by valence
 
 # SORTING OUTPUT IS LIST - 0-th ELEMENT = LOWEST VALENCE
 #_________________________________________________
@@ -708,10 +708,10 @@ y = sorted(y, key=lambda d: d['emotion'][1])  # sort wav_files by valence
 #     f'<td>\n\n `dominance` \n\n</td>')
 
 table = (
-   f'<html lang="en">\n<body>\n<h1>Available TTS Voices.</h1>'
-   f'\nIn \n'
-   f'<a href="https://github.com/audeering/shift/blob/main/demo.py">demo.py</a> '
-   f'you can use the Affective or Non-Affective version of each voice.<hr>'
+   f'<html lang="en">\n<body>\n<h1>Available TTS Voices</h1>'
+   f'\nYou can use the Affective or Non-Affective version of each voice in \n'
+   f'<a href="https://github.com/audeering/shift/blob/main/demo.py">demo.py</a>'
+   f'<hr>'
    f'<table><tr><td>'  # count
    f'</td><td>\n\n voice \n\n</td>'
    f'<td>\n\n Non-Affective \n\n</td>'
