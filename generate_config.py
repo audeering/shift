@@ -679,7 +679,7 @@ y = pd.read_json(GLOBAL_FILE)['voices']
 
 # == markdown table
 
-y = sorted(y, key=lambda d: d['emotion'][0])  # sort wav_files by valence
+y = sorted(y, key=lambda d: d['emotion'][2])  # sort wav_files by valence
 
 # SORTING OUTPUT IS LIST - 0-th ELEMENT = LOWEST VALENCE
 #_________________________________________________
@@ -709,17 +709,17 @@ y = sorted(y, key=lambda d: d['emotion'][0])  # sort wav_files by valence
 
 table = (
    f'<html lang="en">\n<body>\n<h1>Available TTS Voices</h1>'
-   f'\nYou can use the Affective or Non-Affective version of each voice in \n'
+   f'\nYou can use all Affective or Non-Affective voices in \n'
    f'<a href="https://github.com/audeering/shift/blob/main/demo.py">demo.py</a>'
    f'<hr>'
    f'<table><tr><td>'  # count
-   f'</td><td>\n\n voice \n\n</td>'
+   f'</td><td>\n\n Voice \n\n</td>'
    f'<td>\n\n Non-Affective \n\n</td>'
-   f'<td>\n\n emotion volatility \n\n</td>'
+   f'<td>\n\n Emotion Volatility \n\n</td>'
    f'<td>\n\n Affective \n\n</td>'
 )
 
-for i, tup in enumerate(y):
+for i, tup in enumerate(reversed(y)):
 
     _voice, emotion, tgt_wav, affect_wav, fig_file, str_voice = tup.values()
     print('\n\n', _voice, '\n\n')
