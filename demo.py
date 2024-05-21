@@ -1,50 +1,67 @@
 import subprocess
 import soundfile
-import sox
+import msinference
 
-## VOICES mimic3
-# 
-# /scratch/dkounadis/.envs/.tts/lib/python3.8/site-packages/mimic3_tts/
 
-spk1 = 'en_US/vctk_low#p236'
-rate1 = 1.24
 
-spk2 = 'en_UK/apope_low'
-rate2 = 1.64
+my_text = "Metamorphosis of cultural heritage to augmented hypermedia for accessibility and inclusion."
+_voice = 'en_US/vctk_low#p276' # https://audeering.github.io/shift/
+affect = True                  # False = Non-Affective voices
+out_wav = f'example_{affect=}.wav'
 
-pitch_semitones = -4
 
-text = ('<speak>'
-'<prosody volume=\'64\'>'
-f'<prosody rate=\'{rate1}\'>'
-f'<voice name=\'{spk1}\'>'
-'<s>'
-'A an exemplary voice.'
-'</s>'
-'</voice>'
-'</prosody>'
-'</prosody>'
-f'<prosody rate=\'{rate2}\'>'
-f'<voice name=\'{spk2}\'>'
-'<s>'
-'.Another pleasant voice.'
-'</s>'
-'</voice>'
-'</prosody>'
-'</speak>')
+if affect:
 
-with open('_tmp_ssml.txt', 'w') as f:
-    f.write(text)
+    # Mimic-3
 
-raw_tts = 'test.wav'
-ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > {raw_tts}', shell=True)
-ps.wait()
+    reference_wav = '_spk.wav'
+    rate = 4  # high speed sounds nice when used as speaker-reference audio for 2nd stage (StyleTTS2)
+    _ssml = (
+        '<speak>'
+        f'<prosody volume=\'24\'>'
+            f'<prosody rate=\'{rate}\'>'
+            f'<voice name=\'{_voice}\'>'
+            f'<s>Sweet dreams are made of this, ... !!! I travel the world and the seven seas.</s>'
+            '</voice>'
+            '</prosody>'
+            '</prosody>')
+    _ssml += '</speak>'
+    with open('_tmp_ssml.txt', 'w') as f:
+        f.write(_ssml)
+    ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > {reference_wav}', shell=True)
+    ps.wait()  # using ps to call mimic3 because samples dont have time to be written in stdout buffer
 
-x, fs = soundfile.read(raw_tts)
-tfm = sox.Transformer()
-tfm.pitch(pitch_semitones)
-x_shift = tfm.build_array(
-    input_array=x,
-    sample_rate_in=fs)
+    # StyleTTS2
 
-soundfile.write(f'test_pitch.wav', x_shift, fs)
+    x = msinference.inference(my_text,
+                            msinference.compute_style(reference_wav),
+                            alpha=0.3,
+                            beta=0.7,
+                            diffusion_steps=7,
+                            embedding_scale=1)
+    soundfile.write(out_wav, x, 24000)
+
+
+
+else:
+
+
+
+    # Non Affective TTS
+     
+    rate = .84
+    _ssml = (
+        '<speak>'
+        f'<prosody volume=\'94\'>'
+            f'<prosody rate=\'{rate}\'>'
+            f'<voice name=\'{_voice}\'>'
+            f'<s>\'{my_text}\'</s>'
+            '</voice>'
+            '</prosody>'
+            '</prosody>')
+    _ssml += '</speak>'
+    with open('_tmp_ssml.txt', 'w') as f:
+        f.write(_ssml)
+    ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > {out_wav}', shell=True)
+    ps.wait()
+
