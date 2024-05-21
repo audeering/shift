@@ -485,10 +485,10 @@ if not os.path.isfile(GLOBAL_FILE):
 
     sentences = [
         # 'List 2',
-        # 'The boy was there when the sun rose.',
-        # 'A rod is used to catch pink salmon.',
+        'The boy was there when the sun rose.',
+        'A rod is used to catch pink salmon.',
         # https://www.cs.columbia.edu/~hgs/audio/harvard.html
-        # "Metamorphosis of cultural heritage to augmented hypermedia for accessibility and inclusion.",
+        "Metamorphosis of cultural heritage to augmented hypermedia for accessibility and inclusion.",
         'Sweet dreams are made of this, .. !!! I travel the world and the seven seas.',
     ]
 
@@ -679,7 +679,7 @@ y = pd.read_json(GLOBAL_FILE)['voices']
 
 # == markdown table
 
-y = sorted(y, key=lambda d: d['emotion'][2])  # sort wav_files by valence
+y = sorted(y, key=lambda d: sum(d['emotion']))  # sort wav_files by emotion
 
 # SORTING OUTPUT IS LIST - 0-th ELEMENT = LOWEST VALENCE
 #_________________________________________________
@@ -719,7 +719,7 @@ table = (
    f'<td>\n\n Affective \n\n</td>'
 )
 
-for i, tup in enumerate(reversed(y)):
+for i, tup in enumerate(y):
 
     _voice, emotion, tgt_wav, affect_wav, fig_file, str_voice = tup.values()
     print('\n\n', _voice, '\n\n')
