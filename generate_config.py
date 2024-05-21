@@ -472,7 +472,7 @@ if not os.path.isfile(GLOBAL_FILE):
             y = model(y)[0 if embeddings else 1]
 
         # convert to numpy
-        y = y.detach().cpu().numpy().clip(0, 1)
+        y = y.detach().cpu().numpy() #.clip(0, 1)
 
         return y
 
@@ -488,7 +488,7 @@ if not os.path.isfile(GLOBAL_FILE):
         # 'The boy was there when the sun rose.',
         # 'A rod is used to catch pink salmon.',
         # https://www.cs.columbia.edu/~hgs/audio/harvard.html
-        "Metamorphosis of cultural heritage to augmented hypermedia for accessibility and inclusion.",
+        # "Metamorphosis of cultural heritage to augmented hypermedia for accessibility and inclusion.",
         'Sweet dreams are made of this, .. !!! I travel the world and the seven seas.',
     ]
 
@@ -709,8 +709,8 @@ y = sorted(y, key=lambda d: d['emotion'][0])  # sort wav_files by valence
 
 table = (
    f'<html lang="en">\n<body>\n<h1>Available TTS Voices.</h1>'
-   f'<hr>\nVoices can be used in\n'
-   f'<a href="https://github.com/audeering/shift/blob/main/demo.py">demo.py</a>. You can use the basic or affective version of each voice!'
+   f'\nYou can use the basic/affective version of every voice in \n'
+   f'<a href="https://github.com/audeering/shift/blob/main/demo.py">demo.py</a><hr>'
    f'<table><tr><td>'  # count
    f'</td><td>\n\n voice \n\n</td>'
    f'<td>\n\n Basic \n\n</td>'
