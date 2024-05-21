@@ -510,10 +510,10 @@ if not os.path.isfile(GLOBAL_FILE):
 
         if 'cmu-arctic' in str_voice:
             tgt_wav = wav_dir + str_voice.replace('cmu-arctic', 'cmu_arctic') + '.wav'
-            affect_wav = wav_dir + str_voice.replace('cmu-arctic', 'cmu_arctic') + '_emo.wav'
+            affect_wav = wav_dir + str_voice.replace('cmu-arctic', 'cmu_arctic') + '_affect.wav'
         else:
             tgt_wav = wav_dir + str_voice + '.wav' # [...cmu-arctic...](....cmu_arctic....wav) # README has underscore in cmu_arctic.wav
-            affect_wav = wav_dir + str_voice.replace('cmu-arctic', 'cmu_arctic') + '_emo.wav'
+            affect_wav = wav_dir + str_voice.replace('cmu-arctic', 'cmu_arctic') + '_affect.wav'
         
 
 
