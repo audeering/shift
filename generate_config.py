@@ -708,14 +708,14 @@ y = sorted(y, key=lambda d: d['emotion'][0])  # sort wav_files by valence
 #     f'<td>\n\n `dominance` \n\n</td>')
 
 table = (
-   f'<html lang="en">\n<body>\n<h1>Available voices - Default emotion of each voice.</h1>'
-   f'\nOf Branch yt videos!\n<hr>\nVoices can be used in\n'
-   f'<a href="https://github.com/audeering/shift/blob/main/demo.py">demo.py</a>'
+   f'<html lang="en">\n<body>\n<h1>Available TTS Voices.</h1>'
+   f'<hr>\nVoices can be used in\n'
+   f'<a href="https://github.com/audeering/shift/blob/main/demo.py">demo.py</a>. You can use the basic or affective version of each voice!'
    f'<table><tr><td>'  # count
    f'</td><td>\n\n voice \n\n</td>'
-   f'<td>\n\n `affect=False` \n\n</td>'
+   f'<td>\n\n Basic \n\n</td>'
    f'<td>\n\n emotion volatility \n\n</td>'
-   f'<td>\n\n `affect=True` \n\n</td>'
+   f'<td>\n\n Affective \n\n</td>'
 )
 
 for i, tup in enumerate(reversed(y)):  # i is new index
@@ -735,7 +735,7 @@ for i, tup in enumerate(reversed(y)):  # i is new index
 
 
     row = (
-        f'<tr>\n <td>\n {i} \n</td>\n<td>\n\n ```\n{_voice}\n``` \n\n</td>'
+        f'<tr>\n <td>\n {i} \n</td>\n<td>\n\n \n{_voice}\n \n\n</td>'
         f'<td>\n\n<audio preload="none" controls src="{tgt_wav}"></audio>\n\n'
         f'</td><td>\n\n <img src=\"{fig_file}\" alt="sounds" width="420" height="420"> \n\n</td><td>'
         f'<audio preload="none" controls src="{affect_wav}"></audio></td></tr>\n'
