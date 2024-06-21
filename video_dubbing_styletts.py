@@ -5,11 +5,19 @@ from moviepy.editor import *
 import soundfile
 import msinference
 
+# SSH AGENT
+#   eval $(ssh-agent -s)
+#   ssh-add ~/.ssh/id_ed25519_github2024
+#
+#   git remote set-url origin git@github.com:audeering/shift   
+# ==
+
 # yt-dlp https://www.youtube.com/watch?v=mEplIrAP-z4
 
 # https://superuser.com/questions/583393/how-to-extract-subtitle-from-video-using-ffmpeg
 # from pathlib import Path
 # from config import VOICES
+
 import csv
 import json
 import io

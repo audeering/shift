@@ -1,6 +1,6 @@
-# Shift TTS System
+# SHIFT - Affective Video/Text to Speech
 
-Affective Speech Synthesis via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) and [Speech emotion recognition](https://github.com/audeering/w2v2-how-to).
+Affective TTS via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) and [StyleTTS2](https://github.com/yl4579/StyleTTS2) and [Speech emotion recognition](https://github.com/audeering/w2v2-how-to).
 
 ### Installation
 
@@ -11,29 +11,43 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-### Use
+### Usage
 
 ```python
+# Output is saved as out.wav or out.mp4
 
 # TTS
+
+# 1.
 python tts.py --text sample.txt
 
-# TTS - voice selection - Available Voices
+# 2. - see Available Voices (Affective)
 python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann"
 
-# TTS - clone native voice's emotion
+# 3. - see Available Voices
+python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann" --noaffect
+
+# 4. - voice cloning
 python tts.py --text sample.txt --native_voice assets/native_voice.wav
+
+# Image2Speech
+
+# 5. - All TTS args can be used here!
+python tts.py --text sample.txt --image assets/image_from_T31.jpg
+
+# Video2Speech
+
+# 6. - Video Dubbing / Voice Cloning
+python tts.py --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna_en.mp4
 ```
 
-Output wav is saved as `out.wav`
 
-##
 
-# Available voices - english
+# Listen Available voices
 
 <a href="https://audeering.github.io/shift/">Listen to available voices and visualize their emotion!</a>
 
-# Switch Native voice with English TTS
+# Examples
 
 Native voice video
 
@@ -58,8 +72,6 @@ Generate dubbed video:
 python video_dubbing.py  # generate dubbed video from native video & subtitles
 
 ```
-
-Updating to styleTTS2 using this repo [StyleTTS2](https://github.com/yl4579/StyleTTS2)
 
 
 ## Joint Application of D3.1 & D3.2
