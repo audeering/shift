@@ -71,7 +71,7 @@ def process_lines(state: CommandLineInterfaceState, wav_path=None):
 # cat _tmp_ssml.txt | mimic3 --cuda --ssml --noise-w 0.90001 --length-scale 0.91 --noise-scale 0.04 > noise_w=0.90_en_happy_2.wav
 # ======================================================================
 out_dir = 'assets/'
-reference_wav_directory = 'assets/wavs/style_vectors_v2/'
+reference_wav_directory = 'assets/wavs/style_vector_v2/'
 Path(reference_wav_directory).mkdir(parents=True, exist_ok=True)
 Path(out_dir).mkdir(parents=True, exist_ok=True)
 
@@ -293,7 +293,7 @@ for _id, _voice in enumerate(all_names):
     rate = 4  # high speed sounds nice if used as speaker-reference audio for StyleTTS2
     _ssml = (
         '<speak>'
-        '<prosody volume=\'74\'>'
+        '<prosody volume=\'64\'>'
         f'<prosody rate=\'{rate}\'>'
         f'<voice name=\'{_voice}\'>'
         '<s>'
