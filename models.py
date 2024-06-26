@@ -19,7 +19,7 @@ from Modules.diffusion.sampler import KDiffusion, LogNormalDistribution
 from Modules.diffusion.modules import Transformer1d, StyleTransformer1d
 from Modules.diffusion.diffusion import AudioDiffusionConditional
 
-from Modules.discriminators import MultiPeriodDiscriminator, MultiResSpecDiscriminator, WavLMDiscriminator
+
 
 from munch import Munch
 import yaml
@@ -175,38 +175,6 @@ class LinearNorm(torch.nn.Module):
     def forward(self, x):
         return self.linear_layer(x)
 
-class Discriminator2d(nn.Module):
-    def __init__(self, dim_in=48, num_domains=1, max_conv_dim=384, repeat_num=4):
-        super().__init__()
-        blocks = []
-        blocks += [spectral_norm(nn.Conv2d(1, dim_in, 3, 1, 1))]
-
-        for lid in range(repeat_num):
-            dim_out = min(dim_in*2, max_conv_dim)
-            blocks += [ResBlk(dim_in, dim_out, downsample='half')]
-            dim_in = dim_out
-
-        blocks += [nn.LeakyReLU(0.2)]
-        blocks += [spectral_norm(nn.Conv2d(dim_out, dim_out, 5, 1, 0))]
-        blocks += [nn.LeakyReLU(0.2)]
-        blocks += [nn.AdaptiveAvgPool2d(1)]
-        blocks += [spectral_norm(nn.Conv2d(dim_out, num_domains, 1, 1, 0))]
-        self.main = nn.Sequential(*blocks)
-
-    def get_feature(self, x):
-        features = []
-        for l in self.main:
-            x = l(x)
-            features.append(x) 
-        out = features[-1]
-        out = out.view(out.size(0), -1)  # (batch, num_domains)
-        return out, features
-
-    def forward(self, x):
-        out, features = self.get_feature(x)
-        out = out.squeeze()  # (batch)
-        return out, features
-
 class ResBlk1d(nn.Module):
     def __init__(self, dim_in, dim_out, actv=nn.LeakyReLU(0.2),
                  normalize=False, downsample='none', dropout_p=0.2):
@@ -356,6 +324,7 @@ class AdaIN1d(nn.Module):
         h = self.fc(s)
         h = h.view(h.size(0), h.size(1), 1)
         gamma, beta = torch.chunk(h, chunks=2, dim=1)
+        # affine (1 + lin(x)) * inst(x) + lin(x)    is this a skip connection where the weight is a lin of itself
         return (1 + gamma) * self.norm(x) + beta
 
 class UpSample1d(nn.Module):
@@ -612,25 +581,15 @@ def load_ASR_models(ASR_MODEL_PATH, ASR_MODEL_CONFIG):
     return asr_model
 
 def build_model(args, text_aligner, pitch_extractor, bert):
-    assert args.decoder.type in ['istftnet', 'hifigan'], 'Decoder type unknown'
+    print(f'\n==============\n {args.decoder.type=}\n==============L584 models.py @ build_model()\n')
     
-    if args.decoder.type == "istftnet":
-        from Modules.istftnet import Decoder
-        decoder = Decoder(dim_in=args.hidden_dim, style_dim=args.style_dim, dim_out=args.n_mels,
-                resblock_kernel_sizes = args.decoder.resblock_kernel_sizes,
-                upsample_rates = args.decoder.upsample_rates,
-                upsample_initial_channel=args.decoder.upsample_initial_channel,
-                resblock_dilation_sizes=args.decoder.resblock_dilation_sizes,
-                upsample_kernel_sizes=args.decoder.upsample_kernel_sizes, 
-                gen_istft_n_fft=args.decoder.gen_istft_n_fft, gen_istft_hop_size=args.decoder.gen_istft_hop_size) 
-    else:
-        from Modules.hifigan import Decoder
-        decoder = Decoder(dim_in=args.hidden_dim, style_dim=args.style_dim, dim_out=args.n_mels,
-                resblock_kernel_sizes = args.decoder.resblock_kernel_sizes,
-                upsample_rates = args.decoder.upsample_rates,
-                upsample_initial_channel=args.decoder.upsample_initial_channel,
-                resblock_dilation_sizes=args.decoder.resblock_dilation_sizes,
-                upsample_kernel_sizes=args.decoder.upsample_kernel_sizes) 
+    from Modules.hifigan import Decoder
+    decoder = Decoder(dim_in=args.hidden_dim, style_dim=args.style_dim, dim_out=args.n_mels,
+            resblock_kernel_sizes = args.decoder.resblock_kernel_sizes,
+            upsample_rates = args.decoder.upsample_rates,
+            upsample_initial_channel=args.decoder.upsample_initial_channel,
+            resblock_dilation_sizes=args.decoder.resblock_dilation_sizes,
+            upsample_kernel_sizes=args.decoder.upsample_kernel_sizes) 
         
     text_encoder = TextEncoder(channels=args.hidden_dim, kernel_size=5, depth=args.n_layer, n_symbols=args.n_token)
     
@@ -682,13 +641,7 @@ def build_model(args, text_aligner, pitch_extractor, bert):
             diffusion=diffusion,
 
             text_aligner = text_aligner,
-            pitch_extractor=pitch_extractor,
-
-            mpd = MultiPeriodDiscriminator(),
-            msd = MultiResSpecDiscriminator(),
-        
-            # slm discriminator head
-            wd = WavLMDiscriminator(args.slm.hidden, args.slm.nlayers, args.slm.initial_channel),
+            pitch_extractor=pitch_extractor
        )
     
     return nets
