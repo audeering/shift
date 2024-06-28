@@ -5,6 +5,7 @@ import argparse
 import audresample
 from moviepy.editor import *
 import text_utils
+# text_utils.build_ssml(text=['aaaa'], voice='bb')
 import msinference
 import srt
 import subprocess
@@ -21,30 +22,23 @@ def tts_multi_sentence(precomputed_style_vector=None,
        text : string
        voice: string or None (falls to styleTTS)
        '''
-    if 'en_US/' or 'en_UK/' in voice or voice is None:
+    if ('en_US/' in voice) or ('en_UK/' in voice) or (voice is None):
         assert precomputed_style_vector is not None, 'For affective TTS, style vector is needed.'
-        if len(text) > 170:  # long text -> split sentences
-            x = []
-            for _sentence in text_utils.split_into_sentences(text):
-                x.append(msinference.inference(_sentence,
-                            precomputed_style_vector,
-                                        alpha=0.3,
-                                        beta=0.7,
-                                        diffusion_steps=7,
-                                        embedding_scale=1))
-            return np.concatenate(x)  # @24000 Hz - match the StyleTTS (because mimic3 synth 22050)
-        return msinference.inference(text,
-                            precomputed_style_vector,
-                                        alpha=0.3,
-                                        beta=0.7,
-                                        diffusion_steps=7,
-                                        embedding_scale=1)  # single sentence @24000 Hz
-    # NON AFFECTIVE i.e. mimic3
-    # using ps to call mimic3 because samples dont have time to be written in stdout buffer
+        x = []
+        for _sentence in text:
+            x.append(msinference.inference(_sentence,
+                        precomputed_style_vector,
+                                    alpha=0.3,
+                                    beta=0.7,
+                                    diffusion_steps=7,
+                                    embedding_scale=1))
+        return np.concatenate(x)
+    # NON AFFECTIVE mimic3
+    #
+    #
+    # if called via video dubbing text has to be list of single sentence
     _ssml = text_utils.build_ssml(text=text,
                                   voice=voice)
-    with open('_tmp_ssml.txt', 'w') as f:
-        f.write(_ssml)
     ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > _tmp.wav', shell=True)
     ps.wait()
     x, fs = soundfile.read('_tmp.wav')
@@ -82,21 +76,20 @@ def main(args):
         x_native = x_native[:, 0]  # stereo
         # ffmpeg -i Sandra\ Kotevska\,\ Painting\ Rose\ bush\,\ mixed\ media\,\ 2017.\ \[NMzC_036MtE\].mkv -f mp3 -ar 22050 -vn out44.wa
     else:
-        # split inside tts_multi_sentence ? if we call mimic3 there is no need for this split
-        # this is only for StyleTTS2 with long text 
-        # it may happend that a sub is as well long (allow this risk)
-        # actually split in sentences only if text is very long 
-        # check this in tts_multisentence
         with open(args.text, 'r') as f:
-            text = ''.join(f)
-        # text = text_utils.split_into_sentences(text)  # DO IN TTS() if text is vvery long
+            t = ''.join(f)
+        text = [t] if len(t) < 170 else text_utils.split_into_sentences(t)
         
 
 
-
-
-    if args.native is not None:
-        if do_video_dub:
+    #====BEGIN STYLE====
+    precomputed_style_vector = None
+    if args.native:  # Voice Cloning
+        try:
+            precomputed_style_vector = msinference.compute_style(args.native)
+        except soundfile.LibsndfileError:  # Fallback - internal voice
+            print('\n  Could not voice clone audio:', args.native, 'fallback to video or Internal TTS voice.\n')
+        if do_video_dub:  # Clone voice via Video
             native_audio_file = args.video.replace('.','').replace('/','')
             native_audio_file += '__native_audio_track.wav'
             soundfile.write('tgt_spk.wav', 
@@ -104,24 +97,20 @@ def main(args):
                     x_native[:int(4*24000)],    
                                 ], 0).astype(np.float32), 24000)  # 27400?
             precomputed_style_vector = msinference.compute_style('tgt_spk.wav')
-        else:  # not video dub
-            try:
-                precomputed_style_vector = msinference.compute_style(args.native)
-            except ValueError:  # fallback - internal voice
-                pass
-    # Global FALLBACK - Interal Voice
-    if 'en_US' in args.voice or 'en_UK' in args.voices:
-        _dir = '/' if args.affect else '_v2/'
-        precomputed_style_vector = msinference.compute_style(
-            'assets/wavs/style_vector' + _dir + args.voice.replace(
-                                '/', '_').replace('#', '_').replace(
-                                'cmu-arctic', 'cmu_arctic').replace(
-                                '_low', '') + '.wav')
-    else:
-        precomputed_style_vector = None
 
+    # Could Not calc style or args.native is None        
+    print(precomputed_style_vector,'\n\n==============\n\n')
+    if precomputed_style_vector is None:
+        if 'en_US' in args.voice or 'en_UK' in args.voice:
+                    _dir = '/' if args.affect else '_v2/'
+                    precomputed_style_vector = msinference.compute_style(
+                        'assets/wavs/style_vector' + _dir + args.voice.replace(
+                                            '/', '_').replace('#', '_').replace(
+                                            'cmu-arctic', 'cmu_arctic').replace(
+                                            '_low', '') + '.wav')
+    #====END STYLE====
 
-    # Got precomputed_style_vector & do_video_dubbing
+    
 
     # E X E C USE CASES  16h40 27 Jun 2024
 
@@ -196,15 +185,10 @@ def main(args):
             
             pieces = []
             for k, (_text_, orig_start, orig_end) in enumerate(subtitles):
-                # # orig_start += 1.7  # offset of TTS start so some nativ voice is heard
-                # # replace Knajevac > Verbatim phonemes
-                # _text_ = _text_.replace('Knjaževac', 'Knazevach')
-                # _text_ = _text_.replace('fate', 'feyta')
-                # _text_ = _text_.replace('i.e. ', 'that is ')
-                # _text_ = _text_.replace(' cm ', ' centimeter ')
-                # _text_ = _text_.replace('.', ',').replace('sculpture', 'Skullptur').replace('figure', 'feegurr')
-                # _text_ = unidecode(_text_)
-                pieces.append(tts_multi_sentence(text=_text_,
+                
+                # PAUSES ?????????????????????????
+
+                pieces.append(tts_multi_sentence(text=[_text_],
                                                  precomputed_style_vector=precomputed_style_vector,
                                                  voice=args.voice)
                                                  )
@@ -368,9 +352,12 @@ def command_line_args():
     )
     parser.add_argument(
         '--native',
-        help="wav from which to find emotion and automatically choose best TTS voice.",
-        type=str,
-    )
+        help="""
+        --native: (without argument) a flag to do voice cloning using the speech from --video,
+        --native my_voice.wav:  Voice cloning from user provided audio""",
+        # nargs='?',
+        # const=None,
+        default=False)
     parser.add_argument(
         '--voice',
         help="TTS voice - Available voices: https://audeering.github.io/shift/",

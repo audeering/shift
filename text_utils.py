@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+import numpy as np
+import re
+import codecs
 # IPA Phonemizer: https://github.com/bootphon/phonemizer
 
 _pad = "$"
@@ -81,27 +85,32 @@ def split_into_sentences(text):
     if sentences and not sentences[-1]: sentences = sentences[:-1]
     return sentences
 
-def build_ssml(text=None, voice=None):
-    '''create ssml for mimic3 :
-           text : string
+def build_ssml(text=None, 
+               voice=None):
+    '''create ssml:
+           text : list of sentences
            voice: https://github.com/MycroftAI/mimic3-voices
     '''
+    print('\n___________________________\n', len(text), text[0], '\n___________________________________\n')
     _s = '<speak>'
-    for sentence in split_into_sentences(text['text']):
-        rate = min(max(.87, len(sentence) / 76), 1.14) #1.44)  # 1.24 for bieber
-        # print('\n__=__\n', sentence, '\n__=__\n')
-        print(rate, len(sentence) / 76)
+    for short_text in text:
+
+        rate = min(max(.87, len(short_text) / 76), 1.14) #1.44)  # 1.24 for bieber
+        
+        
         volume = int(74 * np.random.rand() + 24)
         # text = ('<speak>'
         _s += f'<prosody volume=\'{volume}\'>'   # THe other voice does not have volume
         _s += f'<prosody rate=\'{rate}\'>'
         _s += f'<voice name=\'{voice}\'>'
         _s += '<s>'
-        _s += sentence
+        _s += short_text
         _s += '</s>'
         _s += '</voice>'
         _s += '</prosody>'
         _s += '</prosody>'
     _s += '</speak>'
-    with open('_tmp_ssml.txt', 'w') as f:
+    print(len(text),'\n\n\n\n\n\n\n', _s)
+    
+    with codecs.open('_tmp_ssml.txt', 'w', "utf-8-sig") as f:
         f.write(_s)
