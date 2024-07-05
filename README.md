@@ -28,21 +28,24 @@ python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann"
 python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann" --noaffect
 
 # voice cloning
-python tts.py --text sample.txt --native_voice assets/native_voice.wav
+python tts.py --text sample.txt --native assets/native_voice.wav
 ```
 
 **Image 2 Speech**
 
 ```python
-# Image to VideoNarration - All TTS args apply also here!
+# Image Narration - All above TTS args apply also here!
 python tts.py --text sample.txt --image assets/image_from_T31.jpg
 ```
 
 **Video 2 Speech**
 
 ```python
-# Video Dubbing / Voice Cloning
+# Video Dubbing - from time-stamped subtitles (.srt)
 python tts.py --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna_en.mp4
+
+# Video Storytell - from text description (.txt)
+python tts.py --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna_en.mp4
 ```
 
 

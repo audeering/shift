@@ -11,6 +11,13 @@ import srt
 import subprocess
 import cv2
 
+# SSH AGENT
+#   eval $(ssh-agent -s)
+#   ssh-add ~/.ssh/id_ed25519_github2024
+#
+#   git remote set-url origin git@github.com:audeering/shift   
+# ==
+
 
 def tts_multi_sentence(precomputed_style_vector=None,
                        text=None,
@@ -55,6 +62,7 @@ def main(args):
     do_video_dub = True if args.text.endswith('.srt') else False
     
     if do_video_dub:
+        print('==\nVideo dubbing from timestamp subtitles: {args.txt}\n\n')
         with open(args.text, "r") as f:
             s = f.read()
         text = [[j.content, j.start.total_seconds(), j.end.total_seconds()] for j in srt.parse(s)]
@@ -264,12 +272,14 @@ def main(args):
                     "-map",
                     " 1:a:0",
                     args.out_file + '.mp4'])
-        # -- END video_dubbing_styletts.py
-        return 0
-    else:  # silent video
-        print('\n VIDEO SILENT not implented')
-        raise NotImplementedError
+            return 0
+        else:  # do_video_dub = False: args.text is (.txt) not timestamped subtitles (.srt)
+            print('\nVideo narration from: {args.text}\n\n..')
+            
 
+            raise NotImplementedError
+    
+    print('==\nNo VIDEO\n==\n__\nDO IM2Speech OR TTS\n\n\n\n')
 
     # IMAGE 2 SPEECH
 
@@ -308,12 +318,12 @@ def main(args):
                 "-map",
                 " 1:a:0",
                 OUT_FILE])
-        print('\nImage2speech - output video is saved as {OUT_FILE}')
+        print(f'\nImage2speech - output video is saved as {OUT_FILE}')
         return 0
     # ========================
     # DEFAULTSD TO BASIC TTS=============================
     x = tts_multi_sentence(text=text, precomputed_style_vector=precomputed_style_vector, voice=args.voice)
-    soundfile.write(args.out_file + '.wav', x)
+    soundfile.write(args.out_file + 'BASIC_TTS.wav', x, 24000)
     return 'BASIC TTS'
 
 
