@@ -1,6 +1,6 @@
 # Text & Video to Affective Speech
 
-This repository implements the Affective TTS System for the [SHIFT Project](https://shift-europe.eu/). The system transforms text & silent videos/images into expressive, affective speech, enhancing accessibility and engagement for cultural heritage (CH) institutions.
+This repository implements the Affective TTS System for [SHIFT Horizon](https://shift-europe.eu/). The system transforms text & silent video / image into expressive speech enhancing accessibility and engagement for cultural heritage institutions.
 
 ##
 
@@ -13,9 +13,11 @@ for English, with optional support for non-affective TTS of [other langauges](ht
 
 **Other Languages**
 
-Although this system builds Affective TTS only for English. For other languages, use any of the [Mimic3 Voices](https://github.com/MycroftAI/mimic3-voices), it will automatically call Mimic3 for non-English voices.
+This system builds Affective TTS only for English. For other languages, use any of the [Mimic3 Voices #Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices), it will automatically call Mimic3 for non-English voices.
 
-## Installation
+## Functions
+
+Install
 
 ```
 virtualenv --python=python3 ~/.envs/.my_env
@@ -24,9 +26,7 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-### Functions
-
-Output is saved in `out.wav  out.mp4`.
+For the commands below, output is saved in `out.wav  out.mp4`.
 
 **Text 2 Speech**
 
