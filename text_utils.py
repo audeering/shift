@@ -85,7 +85,7 @@ def split_into_sentences(text):
     if sentences and not sentences[-1]: sentences = sentences[:-1]
     return sentences
 
-def build_ssml(text=None, 
+def store_ssml(text=None,
                voice=None):
     '''create ssml:
            text : list of sentences

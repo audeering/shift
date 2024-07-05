@@ -46,10 +46,8 @@ def tts_multi_sentence(precomputed_style_vector=None,
     #
     #
     # if called via video dubbing text has to be list of single sentence
-    _ssml = text_utils.build_ssml(text=text,
-                                  voice=voice)
-    with open('_tmp_ssml.txt', 'w') as f:
-        f.write(_ssml)
+    text_utils.store_ssml(text=text,
+                          voice=voice)
     ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > _tmp.wav', shell=True)
     ps.wait()
     x, fs = soundfile.read('_tmp.wav')
@@ -117,7 +115,7 @@ def main(args):
 
     if precomputed_style_vector is None:
         if 'en_US' in args.voice or 'en_UK' in args.voice:
-            _dir = '/' if args.affect else '_v2/'
+            _dir = '/' if args.affective else '_v2/'
             precomputed_style_vector = msinference.compute_style(
                 'assets/wavs/style_vector' + _dir + args.voice.replace(
                     '/', '_').replace(
@@ -285,7 +283,7 @@ def main(args):
     x = tts_multi_sentence(text=text,
                            precomputed_style_vector=precomputed_style_vector, 
                            voice=args.voice)
-    OUT_FILE = args.out_file + 'basic_tts.wav'
+    OUT_FILE = args.out_file + '.wav'
     soundfile.write(OUT_FILE, x, 24000)
 
 
@@ -294,9 +292,9 @@ def command_line_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        '--affect',
-        help="Use emotional variant of Available voices: https://audeering.github.io/shift/",
-        action='store_true',
+        '--affective',
+        help="Select Emotional or non-emotional variant of Available voices: https://audeering.github.io/shift/",
+        action='store_false',
     )
     parser.add_argument(
         '--device',
