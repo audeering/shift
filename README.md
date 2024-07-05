@@ -41,11 +41,11 @@ python tts.py --text sample.txt --image assets/image_from_T31.jpg
 **Video 2 Speech**
 
 ```python
-# Video Dubbing - from time-stamped subtitles (.srt)
-python tts.py --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna_en.mp4
+# Video Dub - from time-stamped subtitles (.srt)
+python tts.py --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
 
 # Video Storytell - from text description (.txt)
-python tts.py --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna_en.mp4
+python tts.py --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna.mp4
 ```
 
 
