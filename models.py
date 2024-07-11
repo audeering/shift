@@ -432,36 +432,6 @@ class ProsodyPredictor(nn.Module):
         
         self.F0_proj = nn.Conv1d(d_hid // 2, 1, 1, 1, 0)
         self.N_proj = nn.Conv1d(d_hid // 2, 1, 1, 1, 0)
-
-
-    def forward(self, texts, style, text_lengths, alignment, m):
-        d = self.text_encoder(texts, style, text_lengths, m)
-        
-        batch_size = d.shape[0]
-        text_size = d.shape[1]
-        
-        # predict duration
-        input_lengths = text_lengths.cpu().numpy()
-        x = nn.utils.rnn.pack_padded_sequence(
-            d, input_lengths, batch_first=True, enforce_sorted=False)
-        
-        m = m.to(text_lengths.device).unsqueeze(1)
-        
-        self.lstm.flatten_parameters()
-        x, _ = self.lstm(x)
-        x, _ = nn.utils.rnn.pad_packed_sequence(
-            x, batch_first=True)
-        
-        x_pad = torch.zeros([x.shape[0], m.shape[-1], x.shape[-1]])
-
-        x_pad[:, :x.shape[1], :] = x
-        x = x_pad.to(x.device)
-                
-        duration = self.duration_proj(nn.functional.dropout(x, 0.5, training=self.training))
-        
-        en = (d.transpose(-1, -2) @ alignment)
-
-        return duration.squeeze(-1), en
     
     def F0Ntrain(self, x, s):
         x, _ = self.shared(x.transpose(-1, -2))
@@ -534,21 +504,13 @@ class DurationEncoder(nn.Module):
 
                 x_pad[:, :, :x.shape[-1]] = x
                 x = x_pad.to(x.device)
-        
+#         print('Calling Duration Encoder\n\n\n\n',x.shape, x.min(), x.max())
+#         Calling Duration Encoder
+#  torch.Size([1, 640, 107]) tensor(-3.0903, device='cuda:0') tensor(2.3089, device='cuda:0')
         return x.transpose(-1, -2)
+
     
-    def inference(self, x, style):
-        x = self.embedding(x.transpose(-1, -2)) * math.sqrt(self.d_model)
-        style = style.expand(x.shape[0], x.shape[1], -1)
-        x = torch.cat([x, style], axis=-1)
-        src = self.pos_encoder(x)
-        output = self.transformer_encoder(src).transpose(0, 1)
-        return output
     
-    def length_to_mask(self, lengths):
-        mask = torch.arange(lengths.max()).unsqueeze(0).expand(lengths.shape[0], -1).type_as(lengths)
-        mask = torch.gt(mask+1, lengths.unsqueeze(1))
-        return mask
     
 def load_F0_models(path):
     # load F0 model
@@ -645,22 +607,3 @@ def build_model(args, text_aligner, pitch_extractor, bert):
        )
     
     return nets
-
-def load_checkpoint(model, optimizer, path, load_only_params=True, ignore_modules=[]):
-    state = torch.load(path, map_location='cpu')
-    params = state['net']
-    for key in model:
-        if key in params and key not in ignore_modules:
-            print('%s loaded' % key)
-            model[key].load_state_dict(params[key], strict=False)
-    _ = [model[key].eval() for key in model]
-    
-    if not load_only_params:
-        epoch = state["epoch"]
-        iters = state["iters"]
-        optimizer.load_state_dict(state["optimizer"])
-    else:
-        epoch = 0
-        iters = 0
-        
-    return model, optimizer, epoch, iters

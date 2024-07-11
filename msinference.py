@@ -1,6 +1,6 @@
 from cached_path import cached_path
 import nltk
-nltk.download('punkt')
+# nltk.download('punkt')
 from scipy.io.wavfile import write
 import torch
 torch.manual_seed(0)
@@ -104,8 +104,7 @@ global_phonemizer = phonemizer.backend.EspeakBackend(language='en-us', preserve_
 # phonemizer = Phonemizer.from_checkpoint(str(cached_path('https://public-asai-dl-models.s3.eu-central-1.amazonaws.com/DeepPhonemizer/en_us_cmudict_ipa_forward.pt')))
 
 
-# config = yaml.safe_load(open("Models/LibriTTS/config.yml"))
-config = yaml.safe_load(open(str(cached_path("hf://yl4579/StyleTTS2-LibriTTS/Models/LibriTTS/config.yml"))))
+config = yaml.safe_load(open(str('Utils/config.yml')))
 
 # load pretrained ASR model
 ASR_config = config.get('ASR_config', False)
@@ -160,19 +159,32 @@ sampler = DiffusionSampler(
 def inference(text, ref_s, alpha = 0.3, beta = 0.7, diffusion_steps=5, embedding_scale=1, use_gruut=False):
     text = text.strip()
     ps = global_phonemizer.phonemize([text])
-    # print(f'PHONEMIZER: {ps=}\n\n') PHONEMIZER: ps=['ɐbˈɛbæbləm ']
+    # print(f'PHONEMIZER: {ps=}\n\n') #PHONEMIZER: ps=['ɐbˈɛbæbləm ']
     ps = word_tokenize(ps[0])
-    # print(f'TOKENIZER: {ps=}\n\n') OKENIZER: ps=['ɐbˈɛbæbləm']
+    # print(f'TOKENIZER: {ps=}\n\n') #OKENIZER: ps=['ɐbˈɛbæbləm']
     ps = ' '.join(ps)
     tokens = textclenaer(ps)
-    # print(f'TEXTCLEAN: {ps=}\n\n') TEXTCLEAN: ps='ɐbˈɛbæbləm'
+    # print(f'TEXTCLEAN: {ps=}\n\n') #TEXTCLEAN: ps='ɐbˈɛbæbləm'
     tokens.insert(0, 0)
     tokens = torch.LongTensor(tokens).to(device).unsqueeze(0)
-    # print(f'TOKENSFINAL: {ps=}\n\n')
+    print(f'TOKENSFINAL: {ps=}\n\n')
 
     with torch.no_grad():
         input_lengths = torch.LongTensor([tokens.shape[-1]]).to(device)
         text_mask = length_to_mask(input_lengths).to(device)
+        # -----------------------
+        # WHO TRANSLATES these tokens to sylla
+        # print(text_mask.shape, '\n__\n', tokens, '\n__\n',  text_mask.min(), text_mask.max())
+        # text_mask=is binary
+        # tokes =  tensor([[  0,  55, 157,  86, 125,  83,  55, 156,  57, 158, 123,  48,  83,  61,
+                        #  157, 102,  61,  16, 138,  64,  16,  53, 156, 138,  54,  62, 131,  85,
+                        #  123,  83,  54,  16,  50, 156,  86, 123, 102, 125, 102,  46, 147,  16,
+                        #   62, 135,  16,  76, 158,  92,  55, 156,  86,  56,  62, 177,  46,  16,
+                        #   50, 157,  43, 102,  58,  85,  55, 156,  51, 158,  46,  51, 158,  83,
+                        #   16,  48,  76, 158, 123,  16,  72,  53,  61, 157,  86,  61,  83,  44,
+                        #  156, 102,  54, 177, 125,  51,  16,  72,  56,  46,  16, 102, 112,  53,
+                        #   54, 156,  63, 158, 147,  83,  56,  16,   4]], device='cuda:0') 
+
 
         t_en = model.text_encoder(tokens, input_lengths, text_mask)
         bert_dur = model.bert(tokens, attention_mask=(~text_mask).int())
