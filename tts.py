@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import os
 import requests
+
 # SSH AGENT
 #   eval $(ssh-agent -s)
 #   ssh-add ~/.ssh/id_ed25519_github2024
@@ -74,7 +75,11 @@ def send_to_server(args):
     payload = {
         'affective': args.affective,
         'voice': args.voice,
-        'native': args.native
+        'native': args.native,
+        'text': args.text,
+        'image': args.image,
+        'video': args.video,
+        'out_file': args.out_file
     }
 
     # In data= we can write args
@@ -129,7 +134,8 @@ def cli():
     parser = command_line_args()
     args = parser.parse_args()
     # main(args)  # --> to be run on server  -> server sends back video or audio -> saved as file by cli()
-    send_to_server(args)
+    r = send_to_server(args)
+    print('REsponse AT client\n----------------------------', r)
 
 
 if __name__ == '__main__':

@@ -12,6 +12,7 @@ import subprocess
 import cv2
 from pathlib import Path
 from permissive_dict import PermissiveDict
+from types import SimpleNamespace
 # StyleTTS 2 HTTP Streaming API by @fakerybakery - Copyright (c) 2023 mrfakename. All rights reserved.
 # Docs: API_DOCS.md
 # To-Do:
@@ -94,22 +95,7 @@ def tts_multi_sentence(precomputed_style_vector=None,
 
 
 
-# def genHeader(sampleRate, bitsPerSample, channels):
-#     datasize = 2000 * 10**6
-#     o = bytes("RIFF", "ascii")
-#     o += (datasize + 36).to_bytes(4, "little")
-#     o += bytes("WAVE", "ascii")
-#     o += bytes("fmt ", "ascii")
-#     o += (16).to_bytes(4, "little")
-#     o += (1).to_bytes(2, "little")
-#     o += (channels).to_bytes(2, "little")
-#     o += (sampleRate).to_bytes(4, "little")
-#     o += (sampleRate * channels * bitsPerSample // 8).to_bytes(4, "little")
-#     o += (channels * bitsPerSample // 8).to_bytes(2, "little")
-#     o += (bitsPerSample).to_bytes(2, "little")
-#     o += bytes("data", "ascii")
-#     o += (datasize).to_bytes(4, "little")
-#     return o
+
 
 # voicelist = ['f-us-1', 'f-us-2', 'f-us-3', 'f-us-4', 'm-us-1', 'm-us-2', 'm-us-3', 'm-us-4']
 # voices = {}
@@ -126,9 +112,7 @@ def index():
     with open('API_DOCS.md', 'r') as f:
         return markdown.markdown(f.read())
 
-# def synthesize(text, voice, steps):
-#     v = voice.lower()
-#     return msinference.inference(t, voices[v], alpha=0.3, beta=0.7, diffusion_steps=lngsteps, embedding_scale=1)
+
 
 
 
@@ -136,51 +120,55 @@ def index():
 
 @app.route("/api/v1/static", methods=['POST'])
 def serve_wav():
+    # https://stackoverflow.com/questions/13522137/in-flask-convert-form-post-
+    #                      object-into-a-representation-suitable-for-mongodb
+    r = request.form.to_dict(flat=False)
+
     
-    # if 'text' not in request.form or 'voice' not in request.form:
-    #     error_response = {'error': 'Missing required fields. Please include "text" and "voice" in your request.'}
-    #     return jsonify(error_response), 400
-    # text = request.form['text'].strip()
     
-    print(f'request.form=}')
-    print('\n==\n')
-    # print('-----------------------\n')
-    # voice = request.form['voice'].strip().lower()
-    # print(request.files.keys(), '\nGOT FILES\n')
+    
 
     # Physically Save Client Files
     for filename, obj in request.files.items():
-        obj.save(f'flask_cache/{filename.replace("/cla","")}')
-     
-    # Args - pass in request 
+        obj.save(f'flask_cache/{filename.replace("/","")}')
+        
+    print('Saved all files on Server Side\n\n') 
+    # # Args - pass in request
     
-    audio_file = request.files['h_voice']
-    audio_file.save('_tmp_srv.wav')
-    # waveform, _ = soundfile.read(file=io.BytesIO(audio_bytes), dtype='float32')
-    x, _ = soundfile.read('_tmp_srv.wav')
-    print(x.shape, x[:4])
+    # audio_file = request.files['h_voice']
+    # audio_file.save('_tmp_srv.wav')
+    # # waveform, _ = soundfile.read(file=io.BytesIO(audio_bytes), dtype='float32')
+    # x, _ = soundfile.read('_tmp_srv.wav')
+    # print(x.shape, x[:4])
 
-    args = PermissiveDict()
+    # args.text = args.get("text")
+    # args.image = args.get('image')
+    # args.video = args.get('video')
+    # args.native = args.get('native')
+    # args.voice = args.get('voice')
+    # args.affective = args.get('affective')
+    # args.out_file = args.get('out_file')
+
+    # print('\nMAKE Args=\n', args)
+    args = SimpleNamespace(text=None if r.get('text') is None else 'flask_cache/' + r.get('text')[0],  # ['sample.txt']
+                           video=None if r.get('video') is None else 'flask_cache/' + r.get('video')[0],
+                           image=None if r.get('image') is None else 'flask_cache/' + r.get('image')[0], #flask_cache/' + request.data.get("image"),
+                           voice=r.get('voice')[0],
+                           native=None if r.get('native') is None else 'flask_cache/' + r.get('native')[0],
+                           affective = r.get('affective')[0],
+                           out_file = r.get('out_file')[0],
+                                  )
+    # print('\n==RECOMPOSED as \n',request.data,request.form,'\n==')
     
-    args.video = 'a'
-    # ------------------------ N O N F L A S K M A I N --------------------------------
-    # def old NONFLASK main(args):
-    # '''
-    # 1. Check text if .srt / .txt
-    # 2. Precompute Style Vector (if native voice cloning or preselect)
-    # 3. extract silent video & inpaint
-    # 4. make tts & mix w. native audio
-    # 5. output video .mp4
-    # 6. If no video nor image: Fallback to TTS -> output .wav
-    # '''
 
+    print(args, 'ENTER Script')
     do_video_dub = True if args.text.endswith('.srt') else False
 
     SILENT_VIDEO = '_silent_video.mp4'
     AUDIO_TRACK = '_audio_track.wav'
 
     if do_video_dub:
-        print('==\nVideo dubbing from timestamp subtitles: {args.txt}\n\n')
+        print('==\nFound .srt : {args.txt}, thus Video should be given as well\n\n')
         with open(args.text, "r") as f:
             s = f.read()
         text = [[j.content, j.start.total_seconds(), j.end.total_seconds()] for j in srt.parse(s)]
@@ -232,7 +220,7 @@ def serve_wav():
                     '#', '_').replace(
                     'cmu-arctic', 'cmu_arctic').replace(
                     '_low', '') + '.wav')
-
+    print('\n  STYLE VECTOR \n', precomputed_style_vector)
     # ====SILENT VIDEO====
 
     if args.video is not None:
@@ -397,35 +385,22 @@ def serve_wav():
     soundfile.write(OUT_FILE, x, 24000)
 
 
-# -------------------- END OF DUMMY SCRIPT tts.py BEFORE FLASK
-
-
-  # Now we have the file as array so we can send image/video
-  # from client to server
-  #
-  #
-  #
-  # thus CLIENT only needs to parse args and prepare the POST  
-  # even on client side ?
-
-
-
-    # if not voice in voices:
-    #     error_response = {'error': 'Invalid voice selected'}
-    #     return jsonify(error_response), 400
-
-    # texts = split_and_recombine_text(text)
-    print(f'\n\n trying to call msinference with: {request.form["text"]=}, {text=}, {voice=}\n\n')
     
 
-    audios = [msinference.inference(text, 
-                                    msinference.compute_style(f'voices/{voice}.wav'), 
-                                    alpha=0.3, beta=0.7, diffusion_steps=7, embedding_scale=1)]
-    # for t in [text]:
-    output_buffer = io.BytesIO()
-    write(output_buffer, 24000, np.concatenate(audios))
-    response = Response(output_buffer.getvalue())
-    response.headers["Content-Type"] = "audio/wav"
+    # audios = [msinference.inference(text, 
+    #                                 msinference.compute_style(f'voices/{voice}.wav'), 
+    #                                 alpha=0.3, beta=0.7, diffusion_steps=7, embedding_scale=1)]
+    # # for t in [text]:
+    # output_buffer = io.BytesIO()
+    # write(output_buffer, 24000, np.concatenate(audios))
+    # response = Response(output_buffer.getvalue())
+    # response.headers["Content-Type"] = "audio/wav"
+
+    # 
+    response.data = open(OUT_FILE, 'rb')
+    response.headers['out-file-from-tts'] = 'simple tts'
     return response
+
+    
 if __name__ == "__main__":
     app.run("0.0.0.0")
