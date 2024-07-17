@@ -26,7 +26,7 @@ import markdown
 import re
 import json
 
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request, send_from_directory
 from flask_cors import CORS
 import soundfile
 
@@ -156,7 +156,7 @@ def serve_wav():
                            voice=r.get('voice')[0],
                            native=None if r.get('native') is None else 'flask_cache/' + r.get('native')[0],
                            affective = r.get('affective')[0],
-                           out_file = r.get('out_file')[0],
+                           out_file = 'flask_cache/' + ('out6' if r.get('out_file')[0] is None else r.get('out_file')[0])
                                   )
     # print('\n==RECOMPOSED as \n',request.data,request.form,'\n==')
     
@@ -397,8 +397,9 @@ def serve_wav():
     # response.headers["Content-Type"] = "audio/wav"
 
     # 
-    response.data = open(OUT_FILE, 'rb')
-    response.headers['out-file-from-tts'] = 'simple tts'
+    # https://stackoverflow.com/questions/67591467/flask-shows-typeerror-send-from-directory-missing-1-required-positional-argum
+    response = send_from_directory('flask_cache/', path=OUT_FILE.split('/')[-1])
+    response.headers['my-custom-header'] = 'my-custom-status-0'
     return response
 
     

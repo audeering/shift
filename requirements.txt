@@ -1,3 +1,7 @@
 mycroft-mimic3-tts[all]
 sox
 soundfile
+srt
+moviepy
+flask
+opencv-python
