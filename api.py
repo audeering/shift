@@ -2,34 +2,20 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import soundfile
-import argparse
 import audresample
-from moviepy.editor import *
+
 import text_utils
 import msinference
 import srt
 import subprocess
 import cv2
-from pathlib import Path
-from permissive_dict import PermissiveDict
-from types import SimpleNamespace
-# StyleTTS 2 HTTP Streaming API by @fakerybakery - Copyright (c) 2023 mrfakename. All rights reserved.
-# Docs: API_DOCS.md
-# To-Do:
-# * Support voice cloning
-# * Implement authentication, user "credits" system w/ SQLite3
-import io
-import os
-import hashlib
-import threading
 import markdown
-import re
-import json
 
-from flask import Flask, Response, request, send_from_directory
+from pathlib import Path
+from types import SimpleNamespace
+from flask import Flask, request, send_from_directory
 from flask_cors import CORS
-import soundfile
-
+from moviepy.editor import *
 
 
 Path('./flask_cache').mkdir(parents=True, exist_ok=True)
@@ -78,34 +64,14 @@ def tts_multi_sentence(precomputed_style_vector=None,
     return audresample.resample(x.astype(np.float32), 24000, fs)[0, :]  # reshapes (64,) -> (1,64)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # voicelist = ['f-us-1', 'f-us-2', 'f-us-3', 'f-us-4', 'm-us-1', 'm-us-2', 'm-us-3', 'm-us-4']
 # voices = {}
-import phonemizer
-global_phonemizer = phonemizer.backend.EspeakBackend(language='en-us', preserve_punctuation=True,  with_stress=True)
-
-
+# import phonemizer
+# global_phonemizer = phonemizer.backend.EspeakBackend(language='en-us', preserve_punctuation=True,  with_stress=True)
 
 app = Flask(__name__)
 cors = CORS(app)
+
 
 @app.route("/")
 def index():
@@ -113,20 +79,11 @@ def index():
         return markdown.markdown(f.read())
 
 
-
-
-
-
-
 @app.route("/api/v1/static", methods=['POST'])
 def serve_wav():
     # https://stackoverflow.com/questions/13522137/in-flask-convert-form-post-
     #                      object-into-a-representation-suitable-for-mongodb
     r = request.form.to_dict(flat=False)
-
-    
-    
-    
 
     # Physically Save Client Files
     for filename, obj in request.files.items():
@@ -156,7 +113,9 @@ def serve_wav():
                            voice=r.get('voice')[0],
                            native=None if r.get('native') is None else 'flask_cache/' + r.get('native')[0],
                            affective = r.get('affective')[0],
-                           out_file = 'flask_cache/' + ('out6' if r.get('out_file')[0] is None else r.get('out_file')[0])
+                           # the internal file on the server is tmpout this is for client to know the format to save 
+                           # the returned file
+                        #    out_file = 'flask_cache/' + ('out6' if r.get('out_file')[0] is None else r.get('out_file')[0])
                                   )
     # print('\n==RECOMPOSED as \n',request.data,request.form,'\n==')
     
@@ -255,7 +214,7 @@ def serve_wav():
             fontColor,
             thickness,
             lineType)
-        #====SILENT VIDEO EXTRACT====
+        # ====SILENT VIDEO EXTRACT====
         # DONLOAD SRT from youtube
         #
         #     yt-dlp --write-sub --sub-lang en --convert-subs "srt" https://www.youtube.com/watch?v=F1Ib7TAu7eg&list=PL4x2B6LSwFewdDvRnUTpBM7jkmpwouhPv&index=2
@@ -264,7 +223,7 @@ def serve_wav():
         # .mkv ->.mp4 moviepy loads only .mp4
         #
         #     ffmpeg -y -i Distaff\ \[qVonBgRXcWU\].mkv -c copy -c:a aac Distaff_qVonBgRXcWU.mp4
-        #           video_file, srt_file = ['assets/Head_of_fortuna.mp4', 
+        #           video_file, srt_file = ['assets/Head_of_fortuna.mp4',
         #                         'assets/head_of_fortuna_en.srt']
         #
         video_file = args.video
@@ -273,6 +232,7 @@ def serve_wav():
             # inpaint banners if native voice
             num = x_native.shape[0]
             is_tts = .5 + .5 * np.tanh(4*(np.linspace(-10, 10, num) + 9.4))  # np.ones_like(x_native)  # fade heaviside
+
             def inpaint_banner(get_frame, t):
                 '''blend banner - (now plays) tts or native voic
                 '''
@@ -306,7 +266,7 @@ def serve_wav():
         # ==== TTS .srt ====
 
         if do_video_dub:
-            OUT_FILE = args.out_file + '_video_dub.mp4'
+            OUT_FILE = './flask_cache/tmp.mp4' #args.out_file + '_video_dub.mp4'
             subtitles = text
             MAX_LEN = int(subtitles[-1][2] + 17) * 24000  # 17 extra seconds fail-safe for long-last-segment
             print("TOTAL LEN SAMPLES ", MAX_LEN, '\n====================')
@@ -334,11 +294,10 @@ def serve_wav():
                             (.64 * total + .27 * x_native)[:, None],
                             24000)
         else:  # Video from plain (.txt)
-            OUT_FILE = args.out_file + '_video_from_txt.mp4'
+            OUT_FILE = './flask_cache/tmp.mp4' #args.out_file + '_video_from_txt.mp4'
             x = tts_multi_sentence(text=text,
                                precomputed_style_vector=precomputed_style_vector,
-                               voice=args.voice
-                               )
+                               voice=args.voice)
             soundfile.write(AUDIO_TRACK, x, 24000)
 
     # IMAGE 2 SPEECH
@@ -346,7 +305,7 @@ def serve_wav():
     if args.image is not None:
 
         STATIC_FRAME = args.image  # 'assets/image_from_T31.jpg'
-        OUT_FILE = args.out_file + '_image_to_speech.mp4'
+        OUT_FILE = './flask_cache/tmp.mp4' #args.out_file + '_image_to_speech.mp4'
 
         # SILENT CLIP
 
@@ -358,7 +317,7 @@ def serve_wav():
                                voice=args.voice
                                )
         soundfile.write(AUDIO_TRACK, x, 24000)
-    if args.video or args.image:
+    elif args.video or args.image:
         # write final output video
         subprocess.call(
             ["ffmpeg",
@@ -374,15 +333,17 @@ def serve_wav():
                 "-map",
                 " 1:a:0",
                 OUT_FILE])
-        print(f'\noutput video is saved as {OUT_FILE}')
-        return 0
 
-    # Fallback: No image nor video provided - do only tts
-    x = tts_multi_sentence(text=text,
-                           precomputed_style_vector=precomputed_style_vector, 
-                           voice=args.voice)
-    OUT_FILE = args.out_file + '.wav'
-    soundfile.write(OUT_FILE, x, 24000)
+        print(f'\noutput video is saved as {OUT_FILE}')
+        
+    else:
+        
+        # Fallback: No image nor video provided - do only tts
+        x = tts_multi_sentence(text=text,
+                            precomputed_style_vector=precomputed_style_vector, 
+                            voice=args.voice)
+        OUT_FILE = './flask_cache/tmp.wav' #args.out_file + '.wav'
+        soundfile.write(OUT_FILE, x, 24000)
 
 
     
@@ -395,13 +356,11 @@ def serve_wav():
     # write(output_buffer, 24000, np.concatenate(audios))
     # response = Response(output_buffer.getvalue())
     # response.headers["Content-Type"] = "audio/wav"
-
-    # 
     # https://stackoverflow.com/questions/67591467/flask-shows-typeerror-send-from-directory-missing-1-required-positional-argum
     response = send_from_directory('flask_cache/', path=OUT_FILE.split('/')[-1])
-    response.headers['my-custom-header'] = 'my-custom-status-0'
+    response.headers['server-out-filename'] = OUT_FILE.split('/')[-1]
     return response
 
-    
+
 if __name__ == "__main__":
     app.run("0.0.0.0")

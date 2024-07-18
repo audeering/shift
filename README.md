@@ -15,7 +15,7 @@ for English, with optional support for non-affective TTS of [other langauges](ht
 
 This system builds Affective TTS only for English. For other languages, use any of the [Mimic3 Voices #Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices), it will automatically call Mimic3 for non-English voices.
 
-## Functions
+## Flask API for Inference
 
 Install
 
@@ -26,7 +26,15 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-For the commands below, output is saved in `out.wav  out.mp4`.
+Start server in a `tmux attach-session -t shift_api`
+
+```
+CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=2 python api.py
+```
+
+## Client
+
+The following commands will call the `api.py` via POST.  Output is saved in `out.wav / out.mp4`.
 
 **Text 2 Speech**
 

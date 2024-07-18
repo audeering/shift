@@ -133,9 +133,14 @@ def send_to_server(args):
 def cli():
     parser = command_line_args()
     args = parser.parse_args()
-    # main(args)  # --> to be run on server  -> server sends back video or audio -> saved as file by cli()
-    r = send_to_server(args)
-    print('REsponse AT client\n----------------------------', r)
+    response = send_to_server(args)
+    
+    with open(
+        args.out_file + '.' + response.headers['server-out-filename'].split('.')[-1],
+        'wb'
+        ) as f:
+        f.write(response.content)
+    print('REsponse AT client []\n----------------------------', response.headers)
 
 
 if __name__ == '__main__':

@@ -1,7 +1,26 @@
-mycroft-mimic3-tts[all]
+# mycroft-mimic3-tts[all]
 sox
 soundfile
 srt
 moviepy
 flask
 opencv-python
+cached_path
+SoundFile
+munch
+torch
+pydub
+pyyaml
+librosa
+nltk
+matplotlib
+accelerate
+transformers
+einops
+einops-exts
+git+https://github.com/resemble-ai/monotonic_align.git # or resemble-monotonic-align
+phonemizer
+cached-path
+flask # for api
+markdown # for api
+flask-cors
