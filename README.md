@@ -1,9 +1,7 @@
 # Text & Video to Affective Speech
 
 Affective TTS System for [SHIFT Horizon Project](https://shift-europe.eu/). The system synthesizes emotional speech from plain text or subtitles (.srt) and overlays it to a final video. Provides 134 English voices.
-  - Is based on [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English.
-  - With optional support for non-affective TTS of [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/).
-  - Foreign voices - need downloading from - [#Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
+  - Is based on [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English. Has optional support for non-affective TTS of [foreign langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign checkpoints - [#Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
 
 ### Available Voices
 
