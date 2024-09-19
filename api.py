@@ -6,6 +6,7 @@ import audresample
 
 import text_utils
 import msinference
+import re
 import srt
 import subprocess
 import cv2
@@ -150,8 +151,9 @@ def serve_wav():
     else:
         with open(args.text, 'r') as f:
             t = ''.join(f)
-        text = [t] if len(t) < 170 else text_utils.split_into_sentences(t)
-
+        t = re.sub(' +', ' ', t)  # delete spaces
+        text = text_utils.split_into_sentences(t)  # split to short sentences (~200 phonemes max)
+        
     # ====STYLE VECTOR====
 
     precomputed_style_vector = None

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import numpy as np
 import re
 import codecs
+import textwrap
 # IPA Phonemizer: https://github.com/bootphon/phonemizer
 
 _pad = "$"
@@ -82,6 +82,10 @@ def split_into_sentences(text):
     text = text.replace("<prd>",".")
     sentences = text.split("<stop>")
     sentences = [s.strip() for s in sentences]
+    
+    # Split Very long sentences >500 phoneme - StyleTTS2 crashes
+    sentences = [sub_sent+' ' for s in sentences for sub_sent in textwrap.wrap(s, 400, break_long_words=0)]
+    
     if sentences and not sentences[-1]: sentences = sentences[:-1]
     return sentences
 
