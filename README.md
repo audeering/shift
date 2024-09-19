@@ -1,12 +1,9 @@
 # Text & Video to Affective Speech
 
-This repository implements the Affective TTS System for [SHIFT Horizon](https://shift-europe.eu/). The system transforms text & silent video / image into expressive speech enhancing accessibility and engagement for cultural heritage institutions.
-
-##
-
-Voices are tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2)
-for English, with optional support for non-affective TTS of [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/).
-  - Foreign voices need downloading from [Mimic3 - HuggingFace Voices #Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
+Affective TTS System for [SHIFT Horizon Project](https://shift-europe.eu/). The system synthesizes emotional speech from plain text or subtitles (.srt) and overlays it to a final video. Provides 134 English voices.
+  - Is based on [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English.
+  - With optional support for non-affective TTS of [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/).
+  - Foreign voices - need downloading from - [#Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
 
 ### Available Voices
 
