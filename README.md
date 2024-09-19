@@ -4,18 +4,15 @@ This repository implements the Affective TTS System for [SHIFT Horizon](https://
 
 ##
 
-The system is based on [StyleTTS2](https://github.com/yl4579/StyleTTS2)
-for English, with optional support for non-affective TTS of [other langauges](https://github.com/MycroftAI/mimic3-voices) via the [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) system.
+Voices are tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2)
+for English, with optional support for non-affective TTS of [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/).
+  - Foreign voices need downloading from [Mimic3 - HuggingFace Voices #Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
 
 ### Available Voices
 
 <a href="https://audeering.github.io/shift/">Listen to available voices!</a>
 
-**Other Languages**
-
-This system builds Affective TTS only for English. For other languages, use any of the [Mimic3 Voices #Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices), it will automatically call Mimic3 for non-English voices.
-
-## Flask API for Inference
+## Flask API
 
 Install
 
@@ -26,15 +23,15 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-Start server in a `tmux attach-session -t shift_api`
+Start Flask
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=2 python api.py
 ```
 
-## Client
+## Inference
 
-The following commands will call the `api.py` via POST.  Output is saved in `out.wav / out.mp4`.
+The following need `api.py` to be running, e.g. `.. on computeXX`. 
 
 **Text 2 Speech**
 
