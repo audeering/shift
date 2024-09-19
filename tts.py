@@ -70,7 +70,7 @@ def command_line_args():
     return parser
 
 def send_to_server(args):
-    url = "http://127.0.0.1:5000/api/v1/static"
+    url = "http://192.168.88.209:5000"
 
     payload = {
         'affective': args.affective,
@@ -136,7 +136,7 @@ def cli():
     response = send_to_server(args)
     
     with open(
-        args.out_file + '.' + response.headers['server-out-filename'].split('.')[-1],
+        args.out_file + '.' + response.headers['suffix-file-type'].split('.')[-1],
         'wb'
         ) as f:
         f.write(response.content)

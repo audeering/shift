@@ -75,11 +75,11 @@ cors = CORS(app)
 
 @app.route("/")
 def index():
-    with open('API_DOCS.md', 'r') as f:
+    with open('README.md', 'r') as f:
         return markdown.markdown(f.read())
 
 
-@app.route("/api/v1/static", methods=['POST'])
+@app.route("/", methods=['GET', 'POST', 'PUT'])
 def serve_wav():
     # https://stackoverflow.com/questions/13522137/in-flask-convert-form-post-
     #                      object-into-a-representation-suitable-for-mongodb
@@ -231,7 +231,7 @@ def serve_wav():
         try:
             # inpaint banners if native voice
             num = x_native.shape[0]
-            is_tts = .5 + .5 * np.tanh(4*(np.linspace(-10, 10, num) + 9.4))  # np.ones_like(x_native)  # fade heaviside
+            is_tts = .5 + .5 * np.tanh(4*(np.linspace(-10, 10, num) + 9.4))  # fade heaviside
 
             def inpaint_banner(get_frame, t):
                 '''blend banner - (now plays) tts or native voic
@@ -247,7 +247,8 @@ def serve_wav():
                 h, w, _ = frame.shape
                 # im[-h:, -w:, :] = (.4 * im[-h:, -w:, :] + .6 * frame_orig).astype(np.uint8)
                 offset_h = 24
-                im[offset_h:h + offset_h, :w, :] = (.4 * im[offset_h:h + offset_h, :w, :] + .6 * frame).astype(np.uint8)
+                im[offset_h:h + offset_h, :w, :] = (.4 * im[offset_h:h + offset_h, :w, :] 
+                                                    + .6 * frame).astype(np.uint8)
 
                 # im2 = np.concatenate([im, frame_tts], 0)
                 # cv2.imshow('t', im2); cv2.waitKey(); cv2.destroyAllWindows()
@@ -258,7 +259,8 @@ def serve_wav():
                 frame = frame_tts
                 h, w, _ = frame.shape
                 offset_h = 24
-                im[offset_h:h + offset_h, :w, :] = (.4 * im[offset_h:h+offset_h, :w, :] + .6 * frame).astype(np.uint8)
+                im[offset_h:h + offset_h, :w, :] = (.4 * im[offset_h:h+offset_h, :w, :] 
+                                                    + .6 * frame).astype(np.uint8)
                 return im
         vf = vf.fl(inpaint_banner)
         vf.write_videofile(SILENT_VIDEO)
@@ -268,7 +270,8 @@ def serve_wav():
         if do_video_dub:
             OUT_FILE = './flask_cache/tmp.mp4' #args.out_file + '_video_dub.mp4'
             subtitles = text
-            MAX_LEN = int(subtitles[-1][2] + 17) * 24000  # 17 extra seconds fail-safe for long-last-segment
+            MAX_LEN = int(subtitles[-1][2] + 17) * 24000  
+            # 17 extra seconds fail-safe for long-last-segment
             print("TOTAL LEN SAMPLES ", MAX_LEN, '\n====================')
             pieces = []
             for k, (_text_, orig_start, orig_end) in enumerate(subtitles):
@@ -356,11 +359,12 @@ def serve_wav():
     # write(output_buffer, 24000, np.concatenate(audios))
     # response = Response(output_buffer.getvalue())
     # response.headers["Content-Type"] = "audio/wav"
-    # https://stackoverflow.com/questions/67591467/flask-shows-typeerror-send-from-directory-missing-1-required-positional-argum
+    # https://stackoverflow.com/questions/67591467/
+    #            flask-shows-typeerror-send-from-directory-missing-1-required-positional-argum
     response = send_from_directory('flask_cache/', path=OUT_FILE.split('/')[-1])
-    response.headers['server-out-filename'] = OUT_FILE.split('/')[-1]
+    response.headers['suffix-file-type'] = OUT_FILE.split('/')[-1]
     return response
 
 
 if __name__ == "__main__":
-    app.run("0.0.0.0")
+    app.run(host="0.0.0.0")
