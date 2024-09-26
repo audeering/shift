@@ -1,4 +1,4 @@
-# SHIFT TTS SYSTEM
+# SHIFT TTS System
 
 Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/). Synthesizes affective speech from text or subtitles (.srt) & overlays it to videos.
   - Has [134 build-in voices](https://audeering.github.io/shift/) finetuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English.
@@ -9,9 +9,7 @@ Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/). Synthesizes af
 
 <a href="https://audeering.github.io/shift/">Listen to available voices!</a>
 
-## Demo
-
-Install
+## Install
 
 ```
 virtualenv --python=python3 ~/.envs/.my_env
@@ -19,6 +17,8 @@ source ~/.envs/.my_env/bin/activate
 cd shift/
 pip install -r requirements.txt
 ```
+
+Demo (TTS saved as `out.wav')
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python demo.py
@@ -34,7 +34,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api
 
 ## Inference
 
-The following needs `api.py` to be running `on the same network, e.g. computeXX`.
+The following needs `api.py` to be already running on the same network, e.g. `computeX`.
 
 **Text 2 Speech**
 
