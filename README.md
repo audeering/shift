@@ -1,13 +1,15 @@
-# SHIFT TTS System
+# SHIFT TTS SYSTEM
 
 Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/). Synthesizes affective speech from text or subtitles (.srt) & overlays it to videos.
   - Has [134 build-in voices](https://audeering.github.io/shift/) finetuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English.
-  - Optional support for  [foreign langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#Mirror1](https://github.com/MycroftAI/mimic3-voices)/[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
-  - A Beta version for simultaneous Audio Background Sound Generation is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
+  - Optional support for [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#HuggingFace](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
+  - A Beta version for Audio Background Sound Generation is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
 
 <a href="https://audeering.github.io/shift/">Listen to available voices!</a>
+
+## Demo
 
 Install
 
@@ -18,10 +20,8 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-## Demo
-
 ```
-CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=2 python demo.py
+CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python demo.py
 ```
 
 ## API
@@ -29,12 +29,12 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=2 python dem
 Start Flask Server
 
 ```
-CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=2 python api.py
+CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api.py
 ```
 
 ## Inference
 
-The following needs `api.py` to be already running .. `on computeXX`. 
+The following needs `api.py` to be running `on the same network, e.g. computeXX`.
 
 **Text 2 Speech**
 

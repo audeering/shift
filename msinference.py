@@ -1,34 +1,30 @@
+import torch
 from cached_path import cached_path
 import nltk
 # nltk.download('punkt')
-from scipy.io.wavfile import write
-import torch
-torch.manual_seed(0)
-torch.backends.cudnn.benchmark = False
-torch.backends.cudnn.deterministic = True
-
 import random
 random.seed(0)
-
 import numpy as np
 np.random.seed(0)
-
-# load packages
 import time
 import random
 import yaml
-from munch import Munch
-import numpy as np
-import torch
-from torch import nn
 import torch.nn.functional as F
+import copy
 import torchaudio
 import librosa
-from nltk.tokenize import word_tokenize
-
 from models import *
-from utils import *
-# from text_utils import TextCleaner
+
+from scipy.io.wavfile import write
+from munch import Munch
+from torch import nn
+from nltk.tokenize import word_tokenize
+from monotonic_align import mask_from_lens
+from monotonic_align.core import maximum_path_c
+
+torch.manual_seed(0)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
 
 
 # IPA Phonemizer: https://github.com/bootphon/phonemizer
@@ -66,6 +62,26 @@ textclenaer = TextCleaner()
 to_mel = torchaudio.transforms.MelSpectrogram(
     n_mels=80, n_fft=2048, win_length=1200, hop_length=300)
 mean, std = -4, 4
+
+# START UTIL
+
+
+
+
+
+
+
+def recursive_munch(d):
+    if isinstance(d, dict):
+        return Munch((k, recursive_munch(v)) for k, v in d.items())
+    elif isinstance(d, list):
+        return [recursive_munch(v) for v in d]
+    else:
+        return d
+    
+
+    
+# ======== UTILS ABOVE    
 
 def length_to_mask(lengths):
     mask = torch.arange(lengths.max()).unsqueeze(0).expand(lengths.shape[0], -1).type_as(lengths)
