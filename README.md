@@ -1,13 +1,20 @@
-# Text & Video to Affective Speech
+# SHIFT TS System
 
-Affective TTS System for [SHIFT Horizon](https://shift-europe.eu/). Synthesizes affective speech from plain text or subtitles (.srt) & overlays it to videos.
-  - Has 134 build-in voices for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English. Has optional support for  [foreign langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
+Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/). Synthesizes affective speech from plain text or subtitles (.srt) & overlays it to videos.
+  - Has [134 build-in voices](https://audeering.github.io/shift/) for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English, and optional support for  [foreign langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#Mirror1](https://github.com/MycroftAI/mimic3-voices)[#Mirror 2](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
+  - A Beta version with simultaneous Speech Synthesis and Audio Background Sound Generation is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
 
 <a href="https://audeering.github.io/shift/">Listen to available voices!</a>
 
-## Flask API
+## Basic Demo
+
+```
+CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=2 python demo.py
+```
+
+## API
 
 Install
 
@@ -18,7 +25,7 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-Start Flask
+Start Flask Server
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=2 python api.py
@@ -26,7 +33,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=2 python api
 
 ## Inference
 
-The following need `api.py` to be running, e.g. `.. on computeXX`. 
+The following needs `api.py` to be already running .. `on computeXX`. 
 
 **Text 2 Speech**
 
