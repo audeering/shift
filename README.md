@@ -1,9 +1,8 @@
 # SHIFT TTS System
 
 Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/). Synthesizes affective speech from text or subtitles (.srt) & overlays it to videos.
-  - Has [134 build-in voices](https://audeering.github.io/shift/) finetuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English.
-  - Optional support for [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#HuggingFace](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
-  - A Beta version for Audio Background Sound Generation is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
+  - Has [134 build-in voices](https://audeering.github.io/shift/) tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English. Optional support for [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#HuggingFace](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
+  - A Beta version of this tool for synthesis of speech & Audio background sound is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
 
@@ -18,7 +17,7 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-Demo (TTS saved as `out.wav')
+Demo - TTS saved as `out.wav`.
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python demo.py
