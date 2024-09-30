@@ -1,8 +1,8 @@
 # SHIFT TTS System
 
-Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/). Synthesizes affective speech from text or subtitles `.srt` and overlays it to videos.
-  - Has [134 build-in voices](https://audeering.github.io/shift/) tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English. Optional support for [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#HuggingFace](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices).
-  - A Beta version of this tool for synthesis of speech & Audio background sound is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
+Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or subtitles `.srt` and overlays it to videos.
+  - Has [134 build-in voices](https://audeering.github.io/shift/) tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English. Optional support for [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#HF Mirror](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices)
+  - A Beta Version of this tool for TTS & audio soundscape is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
 
