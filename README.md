@@ -1,8 +1,14 @@
-# Shift TTS System
+# SHIFT TTS System
 
-Affective Speech Synthesis via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) and [Speech emotion recognition](https://github.com/audeering/w2v2-how-to).
+Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or subtitles `.srt` and overlays it to videos.
+  - Has [134 build-in voices](https://audeering.github.io/shift/) tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English. Optional support for [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#HF Mirror](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices)
+  - A Beta Version of this tool for TTS & audio soundscape is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
-### Installation
+### Available Voices
+
+<a href="https://audeering.github.io/shift/">Listen to available voices!</a>
+
+## Install
 
 ```
 virtualenv --python=python3 ~/.envs/.my_env
@@ -11,29 +17,52 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-### Use
+Demo. TTS output saved as `out.wav`
 
-```python
-
-# TTS
-python tts.py --text sample.txt
-
-# TTS - voice selection - Available Voices
-python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann"
-
-# TTS - clone native voice's emotion
-python tts.py --text sample.txt --native_voice assets/native_voice.wav
+```
+CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python demo.py
 ```
 
-Output wav is saved as `out.wav`
+## API
 
-##
+Start Flask server
 
-# Available voices - english
+```
+CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api.py
+```
 
-<a href="https://audeering.github.io/shift/">Listen to available voices and visualize their emotion!</a>
+## Inference
 
-# Switch Native voice with English TTS
+The following needs `api.py` to be already running `e.g. on tmux session`
+
+**Text 2 Speech**
+
+```python
+# Basic TTS - See Available Voices
+python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann" --affective
+
+# voice cloning
+python tts.py --text sample.txt --native assets/native_voice.wav
+```
+
+**Image 2 Video**
+
+```python
+# Make video narrating an image - All above TTS args apply also here!
+python tts.py --text sample.txt --image assets/image_from_T31.jpg
+```
+
+**Video 2 Video**
+
+```python
+# Video Dubbing - from time-stamped subtitles (.srt)
+python tts.py --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
+
+# Video narration - from text description (.txt)
+python tts.py --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna.mp4
+```
+
+## Examples
 
 Native voice video
 
@@ -47,7 +76,7 @@ Same video where Native voice is replaced with English TTS voice with similar em
 [![Same video w. Native voice replaced with English TTS](assets/tts_video_thumb.png)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
 
 
-## Review demo - SHIFT
+## Video Dubbing
 
 [![Review demo SHIFT](assets/review_demo_thumb.png)](https://www.youtube.com/watch?v=bpt7rOBENcQ)
 
@@ -55,11 +84,9 @@ Generate dubbed video:
 
 
 ```python
-python video_dubbing.py  # generate dubbed video from native video & subtitles
+python tts.py --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
 
 ```
-
-Updating to styleTTS2 using this repo [StyleTTS2](https://github.com/yl4579/StyleTTS2)
 
 
 ## Joint Application of D3.1 & D3.2
@@ -70,5 +97,5 @@ From an image with caption(s) create a video:
 
 ```python
 
-python image_to_speech.py
+python tts.py --text sample.txt --image assets/image_from_T31.jpg
 ```
