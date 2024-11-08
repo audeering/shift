@@ -1,7 +1,8 @@
 # SHIFT TTS System
 
 Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or subtitles `.srt` and overlays it to videos.
-  - Has [134 build-in voices](https://audeering.github.io/shift/) tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English. Optional support for [other langauges](https://github.com/MycroftAI/mimic3-voices) via [mimic3](https://pypi.org/project/mycroft-mimic3-tts/) by downloading the foreign languages - [#HF Mirror](https://huggingface.co/mukowaty/mimic3-voices/tree/main/voices)
+  - Has [134 build-in voices](https://audeering.github.io/shift/) tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English
+  - Supports [foreing langauges](https://github.com/audeering/shift/blob/main/Utils/all_langs.tsv) via [mms-tts](https://huggingface.co/spaces/mms-meta/MMS))
   - A Beta Version of this tool for TTS & audio soundscape is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
@@ -45,57 +46,44 @@ python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann" --affectiv
 python tts.py --text sample.txt --native assets/native_voice.wav
 ```
 
-**Image 2 Video**
+**Native voice 2 (english, affective) TTS**
 
-```python
-# Make video narrating an image - All above TTS args apply also here!
-python tts.py --text sample.txt --image assets/image_from_T31.jpg
+```
+python tts.py --voice "en_US/m-ailabs_low#mary_ann"  --video assets/anbpr.webm --text assets/anbpr.en.srt
 ```
 
-**Video 2 Video**
+[![Native voice > TTS (en)](assets/native_video_thumb.png)](https://youtu.be/9tecQ6amHaY)
 
-```python
-# Video Dubbing - from time-stamped subtitles (.srt)
-python tts.py --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
+**Native voice 2 (romanian) TTS**
 
-# Video narration - from text description (.txt)
-python tts.py --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna.mp4
+```
+python tts.py --voice romanian --video assets/anbpr.webm --text assets/anbpr.ro.srt
 ```
 
-## Examples
-
-Native voice video
-
-[![Native voice ANBPR video](assets/native_video_thumb.png)](https://www.youtube.com/watch?v=tmo2UbKYAqc)
-
-##
-
-Same video where Native voice is replaced with English TTS voice with similar emotion
+[![Native voice > TTS (ro)](assets/tts_video_thumb.png)](https://youtu.be/6bYcD2IZvoU)
 
 
-[![Same video w. Native voice replaced with English TTS](assets/tts_video_thumb.png)](https://www.youtube.com/watch?v=geI1Vqn4QpY)
-
-
-## Video Dubbing
+**Native voice 2 (serbian) TTS**
 
 [![Review demo SHIFT](assets/review_demo_thumb.png)](https://www.youtube.com/watch?v=bpt7rOBENcQ)
 
 Generate dubbed video:
 
-
 ```python
-python tts.py --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
+# Video Dubbing - from time-stamped subtitles (.srt)
+python tts.py --voice serbian --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
 
+# Video narration - from text description (.txt)
+python tts.py --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna.mp4
 ```
 
+**Image 2 Video**
 
-## Joint Application of D3.1 & D3.2
+```python
+# Make video narrating an image
+python tts.py --text sample.txt --image assets/image_from_T31.jpg --voice en_US/cmu-arctic_low#jmk
+```
 
 [![Captions To Video](assets/caption_to_video_thumb.png)](https://youtu.be/wWC8DpOKVvQ)
 
-From an image with caption(s) create a video:
 
-```python
-
-python tts.py --text sample.txt --image assets/image_from_T31.jpg
-```

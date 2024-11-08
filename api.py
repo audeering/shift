@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 import numpy as np
 import soundfile
@@ -9,6 +8,7 @@ import srt
 import subprocess
 import cv2
 import markdown
+import nltk
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -16,7 +16,8 @@ from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from moviepy.editor import *
 
-
+nltk.download('punkt')
+nltk.download('punkt_tab')
 Path('./flask_cache').mkdir(parents=True, exist_ok=True)
 
 # SSH AGENT
@@ -30,17 +31,22 @@ Path('./flask_cache').mkdir(parents=True, exist_ok=True)
 def tts_multi_sentence(precomputed_style_vector=None,
                        text=None,
                        voice=None):
-    '''create 24kHZ np.array via tts'''
+    '''24 kHZ tts'''
     
     if ('en_US/' in voice) or ('en_UK/' in voice) or (voice is None):
+        
         assert precomputed_style_vector is not None, 'For affective TTS, style vector is needed.'
         
-        text = text_utils.split_into_sentences(t)  # split to short sentences (~200 phonemes max)
+        if isinstance(text, str) and len(text) > 100:
+            text = text_utils.split_into_sentences(text)  # split to short sentences (~200 phonemes max)
+        else:
+            text = [text]  # list of D sentences
         
         # STYLETTS2
         
         x = []
         for _sentence in text:
+            print('\n\n\n\n',_sentence,'\n_________________________________________= =p')
             x.append(msinference.inference(_sentence,
                         precomputed_style_vector,
                                     alpha=0.3,
@@ -56,6 +62,38 @@ def tts_multi_sentence(precomputed_style_vector=None,
     
     return x
 
+def _resize(image, width=None, height=None, inter=cv2.INTER_AREA):
+    '''https://github.com/PyImageSearch/imutils/blob/master/imutils/convenience.py'''
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
+
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
+
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
+
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    # resize the image
+    resized = cv2.resize(image, dim, interpolation=inter)
+
+    # return the resized image
+    return resized
+
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -66,6 +104,11 @@ def index():
     with open('README.md', 'r') as f:
         return markdown.markdown(f.read())
 
+def alpha_num(f):
+    f = re.sub(' +', ' ', f)              # delete spaces
+    f = re.sub(r'[^A-Za-z0-9 ]+', '', f)  # del non alpha num
+    return f
+    
 
 @app.route("/", methods=['GET', 'POST', 'PUT'])
 def serve_wav():
@@ -74,42 +117,23 @@ def serve_wav():
     r = request.form.to_dict(flat=False)
 
     # Physically Save Client Files
-    for filename, obj in request.files.items():
-        obj.save(f'flask_cache/{filename.replace("/","")}')
+    for f, obj in request.files.items():
         
-    print('Saved all files on Server Side\n\n') 
-    # # Args - pass in request
-    
-    # audio_file = request.files['h_voice']
-    # audio_file.save('_tmp_srv.wav')
-    # # waveform, _ = soundfile.read(file=io.BytesIO(audio_bytes), dtype='float32')
-    # x, _ = soundfile.read('_tmp_srv.wav')
-    # print(x.shape, x[:4])
-
-    # args.text = args.get("text")
-    # args.image = args.get('image')
-    # args.video = args.get('video')
-    # args.native = args.get('native')
-    # args.voice = args.get('voice')
-    # args.affective = args.get('affective')
-    # args.out_file = args.get('out_file')
-
-    # print('\nMAKE Args=\n', args)
-    args = SimpleNamespace(text=None if r.get('text') is None else 'flask_cache/' + r.get('text')[0],  # ['sample.txt']
-                           video=None if r.get('video') is None else 'flask_cache/' + r.get('video')[0],
-                           image=None if r.get('image') is None else 'flask_cache/' + r.get('image')[0], #flask_cache/' + request.data.get("image"),
-                           voice=r.get('voice')[0],
-                           native=None if r.get('native') is None else 'flask_cache/' + r.get('native')[0],
-                           affective = r.get('affective')[0],
-                           # the internal file on the server is tmpout this is for client to know the format to save 
-                           # the returned file
-                        #    out_file = 'flask_cache/' + ('out6' if r.get('out_file')[0] is None else r.get('out_file')[0])
-                                  )
+        obj.save(f'flask_cache/{alpha_num(f)}')
+        
+    args = SimpleNamespace(
+        text      = None if r.get('text')  is None else 'flask_cache/' + alpha_num(r.get('text' )[0]),  # ['sample.txt']
+        video     = None if r.get('video') is None else 'flask_cache/' + alpha_num(r.get('video')[0]),
+        image     = None if r.get('image') is None else 'flask_cache/' + alpha_num(r.get('image')[0]), #flask_cache/' + request.data.get("image"),
+        voice     = r.get('voice')[0],
+        native    = None if r.get('native') is None else 'flask_cache/' + r.get('native')[0],
+        affective = r.get('affective')[0]
+                          )  # alpha_num('/folder1/folder2/file.txt')
     # print('\n==RECOMPOSED as \n',request.data,request.form,'\n==')
     
 
     print(args, 'ENTER Script')
-    do_video_dub = True if args.text.endswith('.srt') else False
+    do_video_dub = True if args.text.endswith('srt') else False
 
     SILENT_VIDEO = '_silent_video.mp4'
     AUDIO_TRACK = '_audio_track.wav'
@@ -203,6 +227,10 @@ def serve_wav():
             fontColor,
             thickness,
             lineType)
+        
+        print(f'\n______________________________\n'
+              f'Gen Banners for TTS/Native Title {frame_tts.shape=} {frame_orig.shape=}'
+              f'\n______________________________\n')
         # ====SILENT VIDEO EXTRACT====
         # DONLOAD SRT from youtube
         #
@@ -217,39 +245,61 @@ def serve_wav():
         #
         video_file = args.video
         vf = VideoFileClip(video_file)
+        
+        # GET 1st FRAME to OBTAIN frame RESOLUTION
+        h, w, _ = vf.get_frame(0).shape
+        frame_tts = _resize(frame_tts, width=w)
+        frame_orig = _resize(frame_orig, width=w)
+        h, w, _ = frame_orig.shape
+        
         try:
-            # inpaint banners if native voice
+            
+            # inpaint banner to say if native voice
             num = x_native.shape[0]
-            is_tts = .5 + .5 * np.tanh(4*(np.linspace(-10, 10, num) + 9.4))  # fade heaviside
-
+            is_tts = .5 + .5 * np.tanh(4*(np.linspace(-10, 10, num) + 7.4))  # fade heaviside
+            
             def inpaint_banner(get_frame, t):
                 '''blend banner - (now plays) tts or native voic
                 '''
-                im = np.copy(get_frame(t))
+                
+                im = np.copy(get_frame(t))  # pic
+                
 
                 ix = int(t * 24000)
 
-                if is_tts[ix] > .5:  # mask is 1 thus tts else native
-                    frame = frame_tts
+                if is_tts[ix] > .5:     # mask == 1 => tts / mask == 0 -> native
+                    frame = frame_tts   # rename frame to rsz_frame_... because if frame_tts is mod
+                                        # then is considered a "local variable" thus the "outer var"
+                                        # is not observed by python raising referenced before assign
                 else:
                     frame = frame_orig
-                h, w, _ = frame.shape
+                
                 # im[-h:, -w:, :] = (.4 * im[-h:, -w:, :] + .6 * frame_orig).astype(np.uint8)
+                
+                
+
                 offset_h = 24
+                
+                
+                print(f'  > inpaint_banner() HAS NATIVE:  {frame.shape=} {im.shape=}\n\n\n\n')
+                
+                
+                
                 im[offset_h:h + offset_h, :w, :] = (.4 * im[offset_h:h + offset_h, :w, :] 
                                                     + .6 * frame).astype(np.uint8)
-
+                
                 # im2 = np.concatenate([im, frame_tts], 0)
                 # cv2.imshow('t', im2); cv2.waitKey(); cv2.destroyAllWindows()
                 return im  # np.concatenate([im, frane_ttts], 0)
+            
         except UnboundLocalError:  # args.native == False
+            
             def inpaint_banner(get_frame, t):
+
                 im = np.copy(get_frame(t))
-                frame = frame_tts
-                h, w, _ = frame.shape
                 offset_h = 24
                 im[offset_h:h + offset_h, :w, :] = (.4 * im[offset_h:h+offset_h, :w, :] 
-                                                    + .6 * frame).astype(np.uint8)
+                                                    + .6 * frame_tts).astype(np.uint8)
                 return im
         vf = vf.fl(inpaint_banner)
         vf.write_videofile(SILENT_VIDEO)
@@ -265,10 +315,9 @@ def serve_wav():
             pieces = []
             for k, (_text_, orig_start, orig_end) in enumerate(subtitles):
 
-                # PAUSES ?????????????????????????
+                # SHOULD IMPLEMENT PAUSING BETWEEN SUBS
 
-
-                pieces.append(tts_multi_sentence(text=[_text_],
+                pieces.append(tts_multi_sentence(text=_text_,
                                                  precomputed_style_vector=precomputed_style_vector,
                                                  voice=args.voice)
                               )
@@ -282,8 +331,8 @@ def serve_wav():
                 x_native = np.pad(x_native, (0, max(0, total.shape[0] - x_native.shape[0])))
             # print(total.shape, x_native.shape, 'PADDED TRACKS')
             soundfile.write(AUDIO_TRACK,
-                            # (is_tts * total + (1-is_tts) * x_native)[:, None],
-                            (.64 * total + .27 * x_native)[:, None],
+                            (is_tts * total + (1-is_tts) * x_native)[:, None],
+                            # (.64 * total + .27 * x_native)[:, None],
                             24000)
         else:  # Video from plain (.txt)
             OUT_FILE = './flask_cache/tmp.mp4' #args.out_file + '_video_from_txt.mp4'

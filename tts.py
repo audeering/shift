@@ -2,7 +2,10 @@
 import numpy as np
 import argparse
 import os
+import re
 import requests
+from pathlib import Path
+Path('out/').mkdir(parents=True, exist_ok=True)
 
 # SSH AGENT
 #   eval $(ssh-agent -s)
@@ -12,7 +15,10 @@ import requests
 # ==
 
 
-
+def alpha_num(f):
+    f = re.sub(' +', ' ', f)              # delete spaces
+    f = re.sub(r'[^A-Za-z0-9 ]+', '', f)  # del non alpha num
+    return f
 
 
 def command_line_args():
@@ -65,7 +71,13 @@ def command_line_args():
         '--out_file',
         help="Output file name.",
         type=str,
-        default='out'
+        default=None
+    )
+    parser.add_argument(
+        '--scene',
+        help='Sound scene description.',
+        type=str,
+        default=None, #'calm background sounds of a castle'
     )
     return parser
 
@@ -79,7 +91,8 @@ def send_to_server(args):
         'text': args.text,
         'image': args.image,
         'video': args.video,
-        'out_file': args.out_file
+        'scene': args.scene,
+        # 'out_file': args.out_file   # let serve save as temp
     }
 
     # In data= we can write args
@@ -109,14 +122,18 @@ def send_to_server(args):
             native_file = open(args.native, 'rb')
         except FileNotFoundError:
             pass
-
+        
+        
+        
+        # --------------------- send this extra 
             
     print('Sending...\n') 
 
-    response = requests.post(url, data=payload, files=[(args.text, text_file),
-                                                       (args.image, image_file),
-                                                       (args.video, video_file),
-                                                       (args.native, native_file)])  # NONEs do not arrive to servers dict
+    response = requests.post(url, data=payload, 
+                             files=[(args.text, text_file),
+                                    (args.image, image_file),
+                                    (args.video, video_file),
+                                    (args.native, native_file)])  # NONEs do not arrive to servers dict
 
     # Check the response from the server
     if response.status_code == 200:
@@ -133,10 +150,14 @@ def send_to_server(args):
 def cli():
     parser = command_line_args()
     args = parser.parse_args()
+    
+    if args.out_file is None:
+        args.out_file = alpha_num(args.text)
     response = send_to_server(args)
     
     with open(
-        args.out_file + '.' + response.headers['suffix-file-type'].split('.')[-1],
+        # args.out_file is not send to server - server writes tmp - copied by client
+        './out/' + args.out_file + '.' + response.headers['suffix-file-type'].split('.')[-1],
         'wb'
         ) as f:
         f.write(response.content)
@@ -145,3 +166,6 @@ def cli():
 
 if __name__ == '__main__':
     cli()
+
+# assume also video and text for video we have to write some classes for video for audiocraft
+# then call tts.py on this video with nonempty labels - thus calls audiocraft

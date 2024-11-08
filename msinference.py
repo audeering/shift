@@ -304,6 +304,13 @@ with open(f"Utils/all_langs.tsv") as f:
         
 # LOAD hun / ron / serbian - rmc-script_latin / cyrillic-Carpathian (not Vlax)
 
+
+
+
+def has_cyrillic(text):
+    # https://stackoverflow.com/questions/48255244/python-check-if-a-string-contains-cyrillic-characters
+    return bool(re.search('[\u0400-\u04FF]', text))
+
 class TextForeign(object):
     def __init__(self, vocab_file):
         self.symbols = [
@@ -378,17 +385,23 @@ def foreign(text=None, lang='romanian', speed=1.0):
         
     elif 'ser' in lang.lower():
         
-        lang_code = 'rmc-script-latin'   # romani carpathian (has also Vlax)
+        if has_cyrillic(text):
+            
+            lang_code = 'rmc-script_cyrillic'   # romani carpathian (has also Vlax)
+        
+        else:
+            
+            lang_code = 'rmc-script_latin'   # romani carpathian (has also Vlax)
         
     elif 'rom' in lang.lower():
         
         lang_code = 'ron'
+        speed=1.44
         
     else:
-        
-        # Decode Language default MMS TTS
         lang_code = lang.split()[0].strip()
-
+    # Decoded Language
+    print(f'\n\nLANG {lang_code=}\n_____________________\n')
     vocab_file = hf_hub_download(
         repo_id="facebook/mms-tts",
         filename="vocab.txt",
