@@ -1,26 +1,20 @@
 import torch
 from cached_path import cached_path
 import nltk
+import audresample
 # nltk.download('punkt')
-import random
-random.seed(0)
 import numpy as np
 np.random.seed(0)
 import time
-import random
 import yaml
 import torch.nn.functional as F
 import copy
 import torchaudio
 import librosa
 from models import *
-
-from scipy.io.wavfile import write
 from munch import Munch
 from torch import nn
 from nltk.tokenize import word_tokenize
-from monotonic_align import mask_from_lens
-from monotonic_align.core import maximum_path_c
 
 torch.manual_seed(0)
 torch.backends.cudnn.benchmark = False
@@ -172,7 +166,13 @@ sampler = DiffusionSampler(
     clamp=False
 )
 
-def inference(text, ref_s, alpha = 0.3, beta = 0.7, diffusion_steps=5, embedding_scale=1, use_gruut=False):
+def inference(text, 
+              ref_s, 
+              alpha = 0.3, 
+              beta = 0.7, 
+              diffusion_steps=5, 
+              embedding_scale=1, 
+              use_gruut=False):
     text = text.strip()
     ps = global_phonemizer.phonemize([text])
     # print(f'PHONEMIZER: {ps=}\n\n') #PHONEMIZER: ps=['ɐbˈɛbæbləm ']
@@ -254,8 +254,209 @@ def inference(text, ref_s, alpha = 0.3, beta = 0.7, diffusion_steps=5, embedding
             asr_new[:, :, 1:] = asr[:, :, 0:-1]
             asr = asr_new
 
-        out = model.decoder(asr,
+        x = model.decoder(asr,
                                 F0_pred, N_pred, ref.squeeze().unsqueeze(0))
 
 
-    return out.squeeze().cpu().numpy()[..., :-50] # weird pulse at the end of the model, need to be fixed later
+    x = x.squeeze().cpu().numpy()[..., :-50] # weird pulse at the end of the model
+    
+    x /= np.abs(x).max() + 1e-7
+    
+    return x
+
+
+
+
+# ___________________________________________________________
+
+# https://huggingface.co/spaces/mms-meta/MMS/blob/main/tts.py
+# ___________________________________________________________
+
+# -*- coding: utf-8 -*-
+
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+import os
+import re
+import tempfile
+import torch
+import sys
+import numpy as np
+import audiofile
+from huggingface_hub import hf_hub_download
+
+# Setup TTS env
+if "vits" not in sys.path:
+    sys.path.append("Modules/vits")
+
+from Modules.vits import commons, utils
+from Modules.vits.models import SynthesizerTrn
+
+TTS_LANGUAGES = {}
+with open(f"Utils/all_langs.tsv") as f:
+    for line in f:
+        iso, name = line.split(" ", 1)
+        TTS_LANGUAGES[iso.strip()] = name.strip()
+        
+        
+# LOAD hun / ron / serbian - rmc-script_latin / cyrillic-Carpathian (not Vlax)
+
+class TextForeign(object):
+    def __init__(self, vocab_file):
+        self.symbols = [
+            x.replace("\n", "") for x in open(vocab_file, encoding="utf-8").readlines()
+        ]
+        self.SPACE_ID = self.symbols.index(" ")
+        self._symbol_to_id = {s: i for i, s in enumerate(self.symbols)}
+        self._id_to_symbol = {i: s for i, s in enumerate(self.symbols)}
+
+    def text_to_sequence(self, text, cleaner_names):
+        """Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
+        Args:
+        text: string to convert to a sequence
+        cleaner_names: names of the cleaner functions to run the text through
+        Returns:
+        List of integers corresponding to the symbols in the text
+        """
+        sequence = []
+        clean_text = text.strip()
+        for symbol in clean_text:
+            symbol_id = self._symbol_to_id[symbol]
+            sequence += [symbol_id]
+        return sequence
+
+    def uromanize(self, text, uroman_pl):
+        iso = "xxx"
+        with tempfile.NamedTemporaryFile() as tf, tempfile.NamedTemporaryFile() as tf2:
+            with open(tf.name, "w") as f:
+                f.write("\n".join([text]))
+            cmd = f"perl " + uroman_pl
+            cmd += f" -l {iso} "
+            cmd += f" < {tf.name} > {tf2.name}"
+            os.system(cmd)
+            outtexts = []
+            with open(tf2.name) as f:
+                for line in f:
+                    line = re.sub(r"\s+", " ", line).strip()
+                    outtexts.append(line)
+            outtext = outtexts[0]
+        return outtext
+
+    def get_text(self, text, hps):
+        text_norm = self.text_to_sequence(text, hps.data.text_cleaners)
+        if hps.data.add_blank:
+            text_norm = commons.intersperse(text_norm, 0)
+        text_norm = torch.LongTensor(text_norm)
+        return text_norm
+
+    def filter_oov(self, text, lang=None):
+        text = self.preprocess_char(text, lang=lang)
+        val_chars = self._symbol_to_id
+        txt_filt = "".join(list(filter(lambda x: x in val_chars, text)))
+        return txt_filt
+
+    def preprocess_char(self, text, lang=None):
+        """
+        Special treatement of characters in certain languages
+        """
+        if lang == "ron":
+            text = text.replace("ț", "ţ")
+            print(f"{lang} (ț -> ţ): {text}")
+        return text
+
+
+def foreign(text=None, lang='romanian', speed=1.0):
+    # TTS for non english languages supported by 
+    # https://huggingface.co/spaces/mms-meta/MMS
+    
+    if 'hun' in lang.lower():
+        
+        lang_code = 'hun'
+        
+    elif 'ser' in lang.lower():
+        
+        lang_code = 'rmc-script-latin'   # romani carpathian (has also Vlax)
+        
+    elif 'rom' in lang.lower():
+        
+        lang_code = 'ron'
+        
+    else:
+        
+        # Decode Language default MMS TTS
+        lang_code = lang.split()[0].strip()
+
+    vocab_file = hf_hub_download(
+        repo_id="facebook/mms-tts",
+        filename="vocab.txt",
+        subfolder=f"models/{lang_code}",
+    )
+    config_file = hf_hub_download(
+        repo_id="facebook/mms-tts",
+        filename="config.json",
+        subfolder=f"models/{lang_code}",
+    )
+    g_pth = hf_hub_download(
+        repo_id="facebook/mms-tts",
+        filename="G_100000.pth",
+        subfolder=f"models/{lang_code}",
+    )
+    hps = utils.get_hparams_from_file(config_file)
+    text_mapper = TextForeign(vocab_file)
+    net_g = SynthesizerTrn(
+        len(text_mapper.symbols),
+        hps.data.filter_length // 2 + 1,
+        hps.train.segment_size // hps.data.hop_length,
+        **hps.model,
+    )
+    net_g.to(device)
+    _ = net_g.eval()
+
+    _ = utils.load_checkpoint(g_pth, net_g, None)
+    
+    # TTS via MMS
+
+    is_uroman = hps.data.training_files.split(".")[-1] == "uroman"
+
+    if is_uroman:
+        uroman_dir = "Utils/uroman"
+        assert os.path.exists(uroman_dir)
+        uroman_pl = os.path.join(uroman_dir, "bin", "uroman.pl")
+        text = text_mapper.uromanize(text, uroman_pl)
+
+    text = text.lower()
+    text = text_mapper.filter_oov(text, lang=lang)
+    stn_tst = text_mapper.get_text(text, hps)
+    with torch.no_grad():
+        x_tst = stn_tst.unsqueeze(0).to(device)
+        x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).to(device)
+        x = (
+            net_g.infer(
+                x_tst,
+                x_tst_lengths,
+                noise_scale=0.667,
+                noise_scale_w=0.8,
+                length_scale=1.0 / speed)[0][0, 0].cpu().float().numpy()
+            )
+    x /= np.abs(x).max() + 1e-7
+
+    # hyp = (hyp * 32768).astype(np.int16)
+    # x =  hyp  #, text
+    print(x.shape, x.min(), x.max(), hps.data.sampling_rate)  # (hps.data.sampling_rate, 
+    
+    x = audresample.resample(signal=x.astype(np.float32),
+                             original_rate=16000,
+                             target_rate=24000)[0, :]  # reshapes (64,) -> (1,64)
+    return x
+
+
+
+
+# LANG = 'eng'
+# _t = 'Converts a string of text to a sequence of IDs corresponding to the symbols in the text. Args: text: string to convert to a sequence'
+
+# x = synthesize(text=_t, lang=LANG, speed=1.14)
+# audiofile.write('_r.wav', x, 16000)  # mms-tts = 16,000

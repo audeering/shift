@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import soundfile
-import audresample
-
 import text_utils
 import msinference
 import re
@@ -32,15 +30,15 @@ Path('./flask_cache').mkdir(parents=True, exist_ok=True)
 def tts_multi_sentence(precomputed_style_vector=None,
                        text=None,
                        voice=None):
-    '''create 24kHZ np.array with tts
-
-       precomputed_style_vector :   required if en_US or en_UK in voice, so
-                                    to perform affective TTS.
-       text : string
-       voice: string or None (falls to styleTTS)
-       '''
+    '''create 24kHZ np.array via tts'''
+    
     if ('en_US/' in voice) or ('en_UK/' in voice) or (voice is None):
         assert precomputed_style_vector is not None, 'For affective TTS, style vector is needed.'
+        
+        text = text_utils.split_into_sentences(t)  # split to short sentences (~200 phonemes max)
+        
+        # STYLETTS2
+        
         x = []
         for _sentence in text:
             x.append(msinference.inference(_sentence,
@@ -49,26 +47,15 @@ def tts_multi_sentence(precomputed_style_vector=None,
                                     beta=0.7,
                                     diffusion_steps=7,
                                     embedding_scale=1))
-        x = np.concatenate(x)
-        # N = x.shape[0]
-        # x = .9 * x * (np.abs(np.sin(np.linspace(-np.pi, np.pi, x.shape[0]) / .07)))
-        return x
-    # NON AFFECTIVE mimic3
-    #
-    #
-    # if called via video dubbing text has to be list of single sentence
-    text_utils.store_ssml(text=text,
-                          voice=voice)
-    ps = subprocess.Popen(f'cat _tmp_ssml.txt | mimic3 --ssml > _tmp.wav', shell=True)
-    ps.wait()
-    x, fs = soundfile.read('_tmp.wav')
-    return audresample.resample(x.astype(np.float32), 24000, fs)[0, :]  # reshapes (64,) -> (1,64)
+        return np.concatenate(x)
+    # FOREIGN MMS-TTS
+    
+    x = msinference.foreign(text=text,
+                            lang=voice,  # voice = 'romanian', 'serbian' 'hungarian'
+                            speed=1.14)
+    
+    return x
 
-
-# voicelist = ['f-us-1', 'f-us-2', 'f-us-3', 'f-us-4', 'm-us-1', 'm-us-2', 'm-us-3', 'm-us-4']
-# voices = {}
-# import phonemizer
-# global_phonemizer = phonemizer.backend.EspeakBackend(language='en-us', preserve_punctuation=True,  with_stress=True)
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -151,8 +138,8 @@ def serve_wav():
     else:
         with open(args.text, 'r') as f:
             t = ''.join(f)
-        t = re.sub(' +', ' ', t)  # delete spaces
-        text = text_utils.split_into_sentences(t)  # split to short sentences (~200 phonemes max)
+        text = re.sub(' +', ' ', t)  # delete spaces
+        
         
     # ====STYLE VECTOR====
 
@@ -286,7 +273,7 @@ def serve_wav():
                                                  voice=args.voice)
                               )
             total = np.concatenate(pieces, 0)
-            # x = audresample.resample(x.astype(np.float32), 24000, 22050)  # reshapes (64,) -> (1,64)
+            
             # PAD SHORTEST of  TTS / NATIVE
             if len(x_native) > len(total):
                 total = np.pad(total, (0, max(0, x_native.shape[0] - total.shape[0])))
