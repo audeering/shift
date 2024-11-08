@@ -1,4 +1,4 @@
-# SHIFT TTS System
+[SHIFT TTS](assets/shift_banner.png)
 
 Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or subtitles `.srt` and overlays it to videos.
   - Has [134 build-in voices](https://audeering.github.io/shift/) tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2) for English

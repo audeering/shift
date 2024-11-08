@@ -61,7 +61,10 @@ mean, std = -4, 4
 
 
 
-
+def alpha_num(f):
+    f = re.sub(' +', ' ', f)              # delete spaces
+    f = re.sub(r'[^A-Z a-z0-9 ]+', '', f)  # del non alpha num
+    return f
 
 
 
@@ -296,10 +299,13 @@ from Modules.vits import commons, utils
 from Modules.vits.models import SynthesizerTrn
 
 TTS_LANGUAGES = {}
-with open(f"Utils/all_langs.tsv") as f:
+# with open('_d.csv', 'w') as f2:
+with open(f"Utils/all_langs.csv") as f:
     for line in f:
-        iso, name = line.split(" ", 1)
+        iso, name = line.split(",", 1)
         TTS_LANGUAGES[iso.strip()] = name.strip()
+        # f2.write(iso + ',' + name.replace("a S","")+'\n')
+        
         
         
 # LOAD hun / ron / serbian - rmc-script_latin / cyrillic-Carpathian (not Vlax)
@@ -375,7 +381,7 @@ class TextForeign(object):
         return text
 
 
-def foreign(text=None, lang='romanian', speed=1.0):
+def foreign(text=None, lang='romanian', speed=1.64):
     # TTS for non english languages supported by 
     # https://huggingface.co/spaces/mms-meta/MMS
     
@@ -396,7 +402,7 @@ def foreign(text=None, lang='romanian', speed=1.0):
     elif 'rom' in lang.lower():
         
         lang_code = 'ron'
-        speed=1.44
+        speed=1.24
         
     else:
         lang_code = lang.split()[0].strip()
@@ -444,6 +450,7 @@ def foreign(text=None, lang='romanian', speed=1.0):
     text = text_mapper.filter_oov(text, lang=lang)
     stn_tst = text_mapper.get_text(text, hps)
     with torch.no_grad():
+        print(f'{speed=}\n\n\n\n_______________________________')
         x_tst = stn_tst.unsqueeze(0).to(device)
         x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).to(device)
         x = (

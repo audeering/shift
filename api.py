@@ -58,7 +58,7 @@ def tts_multi_sentence(precomputed_style_vector=None,
     
     x = msinference.foreign(text=text,
                             lang=voice,  # voice = 'romanian', 'serbian' 'hungarian'
-                            speed=1.14)
+                            speed=.87)
     
     return x
 
