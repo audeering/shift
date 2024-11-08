@@ -1,7 +1,7 @@
-![SHIFT TTS](assets/shift_banner.png)
+[![SHIFT TTS](assets/shift_banner.png)](https://shift-europe.eu/)
 
-Affective TTS tool for [SHIFT Horizon](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or subtitles `.srt` and overlays it to videos.
-  - Has [134 build-in voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2), as well as various single-speaker [foreing langauges](https://github.com/audeering/shift/blob/main/Utils/all_langs.tsv) via [mms-tts](https://huggingface.co/spaces/mms-meta/MMS)).
+[SHIFT AFFECTIVE TTS](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or `.srt` subtitles and overlay it to video/picture.
+  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2), as well as non emotional [foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.tsv) TTS via [mms](https://huggingface.co/spaces/mms-meta/MMS)).
   - A Beta Version of this tool for TTS & audio soundscape is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
