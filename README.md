@@ -1,7 +1,7 @@
 [![SHIFT TTS](assets/shift_banner.png)](https://shift-europe.eu/)
 
-[SHIFT AFFECTIVE TTS](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or `.srt` subtitles and overlay it to video/picture.
-  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2), as well as non emotional [foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.tsv) TTS via [mms](https://huggingface.co/spaces/mms-meta/MMS)).
+[AFFECTIVE TTS](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or `.srt` subtitles and overlay it to video/picture.
+  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2), as well as non emotional [foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.csv) TTS via [mms](https://huggingface.co/spaces/mms-meta/MMS)).
   - A Beta Version of this tool for TTS & audio soundscape is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
@@ -17,7 +17,7 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-Demo. TTS output saved as `out.wav`
+Demo. TTS output is in `./out` folder.
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python demo.py
@@ -45,7 +45,7 @@ python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann" --affectiv
 python tts.py --text sample.txt --native assets/native_voice.wav
 ```
 
-**Native voice 2 (english, affective) TTS**
+**Native Voice to English (Affective) TTS**
 
 ```
 python tts.py --voice "en_US/m-ailabs_low#mary_ann"  --video assets/anbpr.webm --text assets/anbpr.en.srt
@@ -53,7 +53,7 @@ python tts.py --voice "en_US/m-ailabs_low#mary_ann"  --video assets/anbpr.webm -
 
 [![Native voice > TTS (en)](assets/native_video_thumb.png)](https://youtu.be/9tecQ6amHaY)
 
-**Native voice 2 (romanian) TTS**
+**Native voice To Romanian TTS**
 
 ```
 python tts.py --voice romanian --video assets/anbpr.webm --text assets/anbpr.ro.srt
@@ -62,9 +62,7 @@ python tts.py --voice romanian --video assets/anbpr.webm --text assets/anbpr.ro.
 [![Native voice > TTS (ro)](assets/tts_video_thumb.png)](https://youtu.be/6bYcD2IZvoU)
 
 
-**Native voice 2 (serbian) TTS**
-
-[![Review demo SHIFT](assets/review_demo_thumb.png)](https://www.youtube.com/watch?v=bpt7rOBENcQ)
+**Native voice To Serbian TTS**
 
 Generate dubbed video:
 
@@ -73,10 +71,12 @@ Generate dubbed video:
 python tts.py --voice serbian --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
 
 # Video narration - from text description (.txt)
-python tts.py --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna.mp4
+python tts.py --voice "en_US/hifi-tts_low#6097" --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna.mp4
 ```
 
-**Image 2 Video**
+[![Review demo SHIFT](assets/review_demo_thumb.png)](https://www.youtube.com/watch?v=bpt7rOBENcQ)
+
+**Img/Text To Video**
 
 ```python
 # Make video narrating an image
