@@ -1,7 +1,7 @@
 [![SHIFT TTS](assets/shift_banner.png)](https://shift-europe.eu/)
 
 [AFFECTIVE TTS](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from `.txt` or `.srt` and overlay it to videos / picture.
-  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2). Supports [single voice foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.csv) TTS via [MMS](https://huggingface.co/spaces/mms-meta/MMS).
+  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2). Supports [single-voice foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.csv) TTS via [MMS](https://huggingface.co/spaces/mms-meta/MMS).
   - A Beta Version of this tool for TTS & audio soundscape is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
@@ -25,7 +25,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python dem
 
 ## API
 
-Start Flask `api.py`
+Start Flask `api.py` on a `tmux-session`
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api.py
@@ -33,10 +33,12 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api
 
 ## Inference
 
-To run the examples below `api.py` needs to be running on a `tmux session`. If `api.py` runs on a different machine, copy [here](https://github.com/audeering/shift/blob/main/tts.py#L85) the IP shown in `api.py`.
+To run the examples below, if `api.py` runs on a different machine, copy [here](https://github.com/audeering/shift/blob/main/tts.py#L85) the IP shown in the terminal of `api.py`.
 
 
-### [Text To Speech](https://huggingface.co/dkounadis/artificial-styletts2/discussions/4)
+**Text To Speech**
+
+[Listen to Various Generations](https://huggingface.co/dkounadis/artificial-styletts2/discussions/4)
 
 ```python
 # Basic TTS - See Available Voices
@@ -48,7 +50,7 @@ python tts.py --text assets/LLM_description.txt --native assets/native_voice.wav
 
 **Native Voice to English (Affective) TTS**
 
-```
+```python
 python tts.py --voice "en_US/m-ailabs_low#mary_ann"  --video assets/anbpr.webm --text assets/anbpr.en.srt
 ```
 
