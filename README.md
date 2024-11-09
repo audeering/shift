@@ -1,7 +1,7 @@
 [![SHIFT TTS](assets/shift_banner.png)](https://shift-europe.eu/)
 
-[AFFECTIVE TTS](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from text or `.srt` subtitles and overlay it to video/picture.
-  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2), as well as non emotional [foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.csv) TTS via [mms](https://huggingface.co/spaces/mms-meta/MMS)).
+[AFFECTIVE TTS](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from `.txt` or `.srt` and overlay it to videos / picture.
+  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2), as well as [single voice foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.csv) TTS via [MMS](https://huggingface.co/spaces/mms-meta/MMS).
   - A Beta Version of this tool for TTS & audio soundscape is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
@@ -17,7 +17,7 @@ cd shift/
 pip install -r requirements.txt
 ```
 
-Demo. TTS output is in `./out` folder.
+Demo. result saved in `./out` folder
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python demo.py
@@ -25,7 +25,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python dem
 
 ## API
 
-Start Flask server
+Start Flask `api.py`
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api.py
@@ -33,17 +33,20 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api
 
 ## Inference
 
-The following needs `api.py` to be already running `e.g. on tmux session`
+The following needs `api.py` to be running on tmux session. If you run the examples below from a different machine you may need to set the [IP of the Flask process](https://github.com/audeering/shift/blob/main/tts.py#L85).
+
 
 **Text 2 Speech**
 
 ```python
 # Basic TTS - See Available Voices
-python tts.py --text sample.txt --voice "en_US/m-ailabs_low#mary_ann" --affective
+python tts.py --text assets/LLM_description.txt --voice "en_US/m-ailabs_low#mary_ann"
 
 # voice cloning
-python tts.py --text sample.txt --native assets/native_voice.wav
+python tts.py --text assets/LLM_description.txt --native assets/native_voice.wav
 ```
+
+[Listen to various generations created for the SHIFT Cultural Heritage partners](https://huggingface.co/dkounadis/artificial-styletts2/discussions/4)
 
 **Native Voice to English (Affective) TTS**
 
@@ -62,27 +65,21 @@ python tts.py --voice romanian --video assets/anbpr.webm --text assets/anbpr.ro.
 [![Native voice > TTS (ro)](assets/tts_video_thumb.png)](https://youtu.be/6bYcD2IZvoU)
 
 
-**Native voice To Serbian TTS**
+**Native Voice To English (Affective) TTS**
 
-Generate dubbed video:
-
-```python
-# Video Dubbing - from time-stamped subtitles (.srt)
-python tts.py --voice serbian --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
-
-# Video narration - from text description (.txt)
-python tts.py --voice "en_US/hifi-tts_low#6097" --text assets/head_of_fortuna_GPT.txt --video assets/head_of_fortuna.mp4
+```
+python tts.py --voice en_US/vctk_low#p306 --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
 ```
 
 [![Review demo SHIFT](assets/review_demo_thumb.png)](https://www.youtube.com/watch?v=bpt7rOBENcQ)
 
-**Img/Text To Video**
+**Img & Text To Speech**
 
 ```python
 # Make video narrating an image
-python tts.py --text sample.txt --image assets/image_from_T31.jpg --voice en_US/cmu-arctic_low#jmk
+python tts.py --text assets/LLM_description.txt --image assets/image_from_T31.jpg --voice en_US/cmu-arctic_low#jmk
 ```
 
-[![Captions To Video](assets/caption_to_video_thumb.png)](https://youtu.be/wWC8DpOKVvQ)
+[![Captions To Video](assets/caption_to_video_thumb.png)](https://youtu.be/EjZpa8NI_gA)
 
 

@@ -152,7 +152,8 @@ def cli():
     args = parser.parse_args()
     
     if args.out_file is None:
-        args.out_file = alpha_num(args.text)
+        vid = alpha_num(args.video) if args.video else f'{np.random.rand()*1e7}'[:6]
+        args.out_file = alpha_num(args.text) + '_' + alpha_num(args.voice) + '_' + vid
     response = send_to_server(args)
     
     with open(

@@ -46,7 +46,7 @@ def tts_multi_sentence(precomputed_style_vector=None,
         
         x = []
         for _sentence in text:
-            print('\n\n\n\n',_sentence,'\n_________________________________________= =p')
+
             x.append(msinference.inference(_sentence,
                         precomputed_style_vector,
                                     alpha=0.3,
@@ -104,10 +104,7 @@ def index():
     with open('README.md', 'r') as f:
         return markdown.markdown(f.read())
 
-def alpha_num(f):
-    f = re.sub(' +', ' ', f)              # delete spaces
-    f = re.sub(r'[^A-Za-z0-9 ]+', '', f)  # del non alpha num
-    return f
+
     
 
 @app.route("/", methods=['GET', 'POST', 'PUT'])
@@ -119,12 +116,12 @@ def serve_wav():
     # Physically Save Client Files
     for f, obj in request.files.items():
         
-        obj.save(f'flask_cache/{alpha_num(f)}')
+        obj.save(f'flask_cache/{f[-6:]}')
         
     args = SimpleNamespace(
-        text      = None if r.get('text')  is None else 'flask_cache/' + alpha_num(r.get('text' )[0]),  # ['sample.txt']
-        video     = None if r.get('video') is None else 'flask_cache/' + alpha_num(r.get('video')[0]),
-        image     = None if r.get('image') is None else 'flask_cache/' + alpha_num(r.get('image')[0]), #flask_cache/' + request.data.get("image"),
+        text      = None if r.get('text')  is None else 'flask_cache/' + r.get('text' )[0][-6:],  # ['sample.txt']
+        video     = None if r.get('video') is None else 'flask_cache/' + r.get('video')[0][-6:],
+        image     = None if r.get('image') is None else 'flask_cache/' + r.get('image')[0][-6:], #flask_cache/' + request.data.get("image"),
         voice     = r.get('voice')[0],
         native    = None if r.get('native') is None else 'flask_cache/' + r.get('native')[0],
         affective = r.get('affective')[0]
@@ -192,7 +189,7 @@ def serve_wav():
                     '#', '_').replace(
                     'cmu-arctic', 'cmu_arctic').replace(
                     '_low', '') + '.wav')
-    print('\n  STYLE VECTOR \n', precomputed_style_vector)
+    print('\n  STYLE VECTOR \n', precomputed_style_vector.shape)
     # ====SILENT VIDEO====
 
     if args.video is not None:
@@ -304,32 +301,56 @@ def serve_wav():
         vf = vf.fl(inpaint_banner)
         vf.write_videofile(SILENT_VIDEO)
 
-        # ==== TTS .srt ====
-
+        # ==== SYNC .srt ====
+        
         if do_video_dub:
             OUT_FILE = './flask_cache/tmp.mp4' #args.out_file + '_video_dub.mp4'
             subtitles = text
-            MAX_LEN = int(subtitles[-1][2] + 17) * 24000  
+            MAX_LEN = int(subtitles[-1][2] + 17) * 24000
+            total = np.zeros(MAX_LEN, dtype=np.float32)
             # 17 extra seconds fail-safe for long-last-segment
-            print("TOTAL LEN SAMPLES ", MAX_LEN, '\n====================')
+            
+            previous_segment_end = 0
             pieces = []
             for k, (_text_, orig_start, orig_end) in enumerate(subtitles):
+                
+                x = tts_multi_sentence(
+                    text=_text_,
+                    precomputed_style_vector=precomputed_style_vector,
+                    voice=args.voice)
 
-                # SHOULD IMPLEMENT PAUSING BETWEEN SUBS
+                # PAUSES BETWEEN SUBTITLE SEGMENTS
 
-                pieces.append(tts_multi_sentence(text=_text_,
-                                                 precomputed_style_vector=precomputed_style_vector,
-                                                 voice=args.voice)
-                              )
-            total = np.concatenate(pieces, 0)
+                orig_start = int(orig_start * 24000)
+                long_tts = (orig_start + len(x)) / 24000 - orig_end
+                if long_tts > 0:   # TTS wants to finish beyond native_end -> tell = tell-diff/2
+                    # MAX ALLOWED SHIFT to the LEFT is previous_segment_end
+                    tts_start = min(previous_segment_end, orig_start - int(long_tts))
+                else:
+                    tts_start = max(orig_start, previous_segment_end)  # to assure that we don't cut a long
+                    # unfinished previous segment we should use as tts_start
+                    # the max(orig_start, previous_segment_end)
+                previous_segment_end = tts_start + len(x)
+                total[tts_start:previous_segment_end] = x
+                
+                # --
+
+
+
             
             # PAD SHORTEST of  TTS / NATIVE
             if len(x_native) > len(total):
+                
                 total = np.pad(total, (0, max(0, x_native.shape[0] - total.shape[0])))
 
-            else:  # pad native to len of is_tts & total
-                x_native = np.pad(x_native, (0, max(0, total.shape[0] - x_native.shape[0])))
-            # print(total.shape, x_native.shape, 'PADDED TRACKS')
+            else:
+                
+                shorter_n = x_native.shape[0]
+                longer_n = total.shape[0]
+                x_native = np.pad(x_native, (0, max(0, longer_n - shorter_n)))
+                is_tts = np.pad(is_tts, (0, max(0, longer_n - shorter_n)))
+                
+            # print(total.shape, x_native.shape, is_tts.shape, 'PADDED TRACKS')
             soundfile.write(AUDIO_TRACK,
                             (is_tts * total + (1-is_tts) * x_native)[:, None],
                             # (.64 * total + .27 * x_native)[:, None],
@@ -344,7 +365,7 @@ def serve_wav():
     # IMAGE 2 SPEECH
 
     if args.image is not None:
-
+        
         STATIC_FRAME = args.image  # 'assets/image_from_T31.jpg'
         OUT_FILE = './flask_cache/tmp.mp4' #args.out_file + '_image_to_speech.mp4'
 
@@ -358,7 +379,8 @@ def serve_wav():
                                voice=args.voice
                                )
         soundfile.write(AUDIO_TRACK, x, 24000)
-    elif args.video or args.image:
+        
+    if args.video or args.image:
         # write final output video
         subprocess.call(
             ["ffmpeg",
@@ -375,7 +397,7 @@ def serve_wav():
                 " 1:a:0",
                 OUT_FILE])
 
-        print(f'\noutput video is saved as {OUT_FILE}')
+        print(f'\nIM2SPeech: output video is saved as {OUT_FILE}')
         
     else:
         
@@ -383,10 +405,11 @@ def serve_wav():
         x = tts_multi_sentence(text=text,
                             precomputed_style_vector=precomputed_style_vector, 
                             voice=args.voice)
+        
         OUT_FILE = './flask_cache/tmp.wav' #args.out_file + '.wav'
         soundfile.write(OUT_FILE, x, 24000)
 
-
+        print(f'\nFALLBACK: output video is saved as {OUT_FILE}')
     
 
     # audios = [msinference.inference(text, 

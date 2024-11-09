@@ -186,7 +186,7 @@ def inference(text,
     # print(f'TEXTCLEAN: {ps=}\n\n') #TEXTCLEAN: ps='ɐbˈɛbæbləm'
     tokens.insert(0, 0)
     tokens = torch.LongTensor(tokens).to(device).unsqueeze(0)
-    print(f'TOKENSFINAL: {ps=}\n\n')
+    # print(f'TOKENSFINAL: {ps=}\n\n')
 
     with torch.no_grad():
         input_lengths = torch.LongTensor([tokens.shape[-1]]).to(device)
