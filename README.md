@@ -33,7 +33,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api
 
 ## Inference
 
-To run the examples below, if `api.py` runs on a different machine, copy [here](https://github.com/audeering/shift/blob/main/tts.py#L85) the IP shown in the terminal of `api.py`.
+For below examples, if `api.py` runs on a different machine, copy [here](https://github.com/audeering/shift/blob/main/tts.py#L85) the IP shown in the terminal of `api.py`.
 
 
 **Text To Speech**
@@ -58,7 +58,7 @@ python tts.py --voice "en_US/m-ailabs_low#mary_ann"  --video assets/anbpr.webm -
 
 **Native voice To Romanian TTS**
 
-```
+```python
 python tts.py --voice romanian --video assets/anbpr.webm --text assets/anbpr.ro.srt
 ```
 
@@ -67,8 +67,8 @@ python tts.py --voice romanian --video assets/anbpr.webm --text assets/anbpr.ro.
 
 **Native Voice To English (Affective) TTS**
 
-```
-python tts.py --voice en_US/vctk_low#p306 --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
+```python
+python tts.py --voice "en_US/vctk_low#p306" --text assets/head_of_fortuna_en.srt --video assets/head_of_fortuna.mp4
 ```
 
 [![Review demo SHIFT](assets/review_demo_thumb.png)](https://www.youtube.com/watch?v=bpt7rOBENcQ)
@@ -76,8 +76,8 @@ python tts.py --voice en_US/vctk_low#p306 --text assets/head_of_fortuna_en.srt -
 **Img To Speech**
 
 ```python
-# Make video narrating an image
-python tts.py --text assets/LLM_description.txt --image assets/image_from_T31.jpg --voice en_US/cmu-arctic_low#jmk
+# Video narrating an image
+python tts.py --text assets/LLM_description.txt --image assets/image_from_T31.jpg --voice "en_US/cmu-arctic_low#jmk"
 ```
 
 [![Captions To Video](assets/caption_to_video_thumb.png)](https://youtu.be/EjZpa8NI_gA)
