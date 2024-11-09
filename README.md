@@ -1,7 +1,7 @@
 [![SHIFT TTS](assets/shift_banner.png)](https://shift-europe.eu/)
 
 [AFFECTIVE TTS](https://shift-europe.eu/) using [this phenomenon](https://huggingface.co/dkounadis/artificial-styletts2/discussions/2). Synthesize speech from `.txt` or `.srt` and overlay it to videos / picture.
-  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2), as well as [single voice foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.csv) TTS via [MMS](https://huggingface.co/spaces/mms-meta/MMS).
+  - Has [134 affective voices](https://audeering.github.io/shift/) for English tuned for [StyleTTS2](https://github.com/yl4579/StyleTTS2). Supports [single voice foreign languages](https://github.com/audeering/shift/blob/main/Utils/all_langs.csv) TTS via [MMS](https://huggingface.co/spaces/mms-meta/MMS).
   - A Beta Version of this tool for TTS & audio soundscape is [build here](https://huggingface.co/dkounadis/artificial-styletts2)
 
 ### Available Voices
@@ -33,10 +33,10 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api
 
 ## Inference
 
-The following needs `api.py` to be running on tmux session. If you run the examples below from a different machine you may need to set the [IP of the Flask process](https://github.com/audeering/shift/blob/main/tts.py#L85).
+To run the examples below `api.py` needs to be running on a `tmux session`. If `api.py` runs on a different machine, copy [here](https://github.com/audeering/shift/blob/main/tts.py#L85) the IP shown in `api.py`.
 
 
-**Text 2 Speech**
+### [Text To Speech](https://huggingface.co/dkounadis/artificial-styletts2/discussions/4)
 
 ```python
 # Basic TTS - See Available Voices
@@ -45,8 +45,6 @@ python tts.py --text assets/LLM_description.txt --voice "en_US/m-ailabs_low#mary
 # voice cloning
 python tts.py --text assets/LLM_description.txt --native assets/native_voice.wav
 ```
-
-[Listen to various generations created for the SHIFT Cultural Heritage partners](https://huggingface.co/dkounadis/artificial-styletts2/discussions/4)
 
 **Native Voice to English (Affective) TTS**
 
@@ -73,7 +71,7 @@ python tts.py --voice en_US/vctk_low#p306 --text assets/head_of_fortuna_en.srt -
 
 [![Review demo SHIFT](assets/review_demo_thumb.png)](https://www.youtube.com/watch?v=bpt7rOBENcQ)
 
-**Img & Text To Speech**
+**Img To Speech**
 
 ```python
 # Make video narrating an image
