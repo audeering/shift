@@ -381,7 +381,7 @@ class TextForeign(object):
         return text
 
 
-def foreign(text=None, lang='romanian', speed=1.64):
+def foreign(text=None, lang='romanian', speed=None):
     # TTS for non english languages supported by 
     # https://huggingface.co/spaces/mms-meta/MMS
     
@@ -402,7 +402,7 @@ def foreign(text=None, lang='romanian', speed=1.64):
     elif 'rom' in lang.lower():
         
         lang_code = 'ron'
-        speed=1.24
+        speed = 1.24 if speed is None else speed
         
     else:
         lang_code = lang.split()[0].strip()

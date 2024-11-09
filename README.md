@@ -25,7 +25,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python dem
 
 ## API
 
-Start Flask `api.py` on a `tmux-session`
+Flask `api.py` on a `tmux-session`
 
 ```
 CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api.py
@@ -33,7 +33,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api
 
 ## Inference
 
-If `api.py` runs on a different machine, copy [here](https://github.com/audeering/shift/blob/main/tts.py#L85) the IP shown in the terminal of `api.py`.
+Examples below need `api.py` to be already running. If `api.py` runs on a different machine, [use the IP shown in the terminal](https://github.com/audeering/shift/blob/main/tts.py#L85) of `api.py`.
 
 
 **Text To Speech**
@@ -41,11 +41,8 @@ If `api.py` runs on a different machine, copy [here](https://github.com/audeerin
 
 
 ```python
-# Basic TTS - See Available Voices
+# Basic TTS - See Available Voices Above - saves .wav in ./out
 python tts.py --text assets/LLM_description.txt --voice "en_US/m-ailabs_low#mary_ann"
-
-# voice cloning
-python tts.py --text assets/LLM_description.txt --native assets/native_voice.wav
 ```
 
 [Listen to Various Generations](https://huggingface.co/dkounadis/artificial-styletts2/discussions/4)

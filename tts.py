@@ -74,10 +74,10 @@ def command_line_args():
         default=None
     )
     parser.add_argument(
-        '--scene',
-        help='Sound scene description.',
+        '--speed',
+        help='speec of TTS (only used in Non English voices).',
         type=str,
-        default=None, #'calm background sounds of a castle'
+        default=1.24,
     )
     return parser
 
@@ -91,7 +91,7 @@ def send_to_server(args):
         'text': args.text,
         'image': args.image,
         'video': args.video,
-        'scene': args.scene,
+        'speed': args.speed,
         # 'out_file': args.out_file   # let serve save as temp
     }
 

@@ -30,7 +30,8 @@ Path('./flask_cache').mkdir(parents=True, exist_ok=True)
 
 def tts_multi_sentence(precomputed_style_vector=None,
                        text=None,
-                       voice=None):
+                       voice=None,
+                       speed=None):
     '''24 kHZ tts'''
     
     if ('en_US/' in voice) or ('en_UK/' in voice) or (voice is None):
@@ -58,7 +59,7 @@ def tts_multi_sentence(precomputed_style_vector=None,
     
     x = msinference.foreign(text=text,
                             lang=voice,  # voice = 'romanian', 'serbian' 'hungarian'
-                            speed=.87)
+                            speed=speed)
     
     return x
 
@@ -113,18 +114,19 @@ def serve_wav():
     #                      object-into-a-representation-suitable-for-mongodb
     r = request.form.to_dict(flat=False)
 
-    # Physically Save Client Files
+    # Physically Save Client Files - DELTE / of name ?
     for f, obj in request.files.items():
         
         obj.save(f'flask_cache/{f[-6:]}')
         
     args = SimpleNamespace(
-        text      = None if r.get('text')  is None else 'flask_cache/' + r.get('text' )[0][-6:],  # ['sample.txt']
+        text      = None if r.get('text')  is None else 'flask_cache/' + r.get('text' )[0][-6:],
         video     = None if r.get('video') is None else 'flask_cache/' + r.get('video')[0][-6:],
-        image     = None if r.get('image') is None else 'flask_cache/' + r.get('image')[0][-6:], #flask_cache/' + request.data.get("image"),
-        voice     = r.get('voice')[0],
-        native    = None if r.get('native') is None else 'flask_cache/' + r.get('native')[0],
-        affective = r.get('affective')[0]
+        image     = None if r.get('image') is None else 'flask_cache/' + r.get('image')[0][-6:],
+        native    = None if r.get('native') is None else 'flask_cache/' + r.get('native')[0][-6:],
+        affective =       r.get('affective')[0],
+        voice     =       r.get('voice')[0],
+        speed     = float(r.get('speed')[0])  # For Non-English MMS TTS
                           )  # alpha_num('/folder1/folder2/file.txt')
     # print('\n==RECOMPOSED as \n',request.data,request.form,'\n==')
     
@@ -189,7 +191,9 @@ def serve_wav():
                     '#', '_').replace(
                     'cmu-arctic', 'cmu_arctic').replace(
                     '_low', '') + '.wav')
-    print('\n  STYLE VECTOR \n', precomputed_style_vector.shape)
+            
+    # NOTE: style vector is None for FOREIGN LANGS
+    
     # ====SILENT VIDEO====
 
     if args.video is not None:
@@ -317,7 +321,8 @@ def serve_wav():
                 x = tts_multi_sentence(
                     text=_text_,
                     precomputed_style_vector=precomputed_style_vector,
-                    voice=args.voice)
+                    voice=args.voice,
+                    speed=args.speed)
 
                 # PAUSES BETWEEN SUBTITLE SEGMENTS
 
@@ -359,7 +364,7 @@ def serve_wav():
             OUT_FILE = './flask_cache/tmp.mp4' #args.out_file + '_video_from_txt.mp4'
             x = tts_multi_sentence(text=text,
                                precomputed_style_vector=precomputed_style_vector,
-                               voice=args.voice)
+                               voice=args.voice,                            speed=args.speed)
             soundfile.write(AUDIO_TRACK, x, 24000)
 
     # IMAGE 2 SPEECH
@@ -376,7 +381,7 @@ def serve_wav():
 
         x = tts_multi_sentence(text=text,
                                precomputed_style_vector=precomputed_style_vector,
-                               voice=args.voice
+                               voice=args.voice,                            speed=args.speed
                                )
         soundfile.write(AUDIO_TRACK, x, 24000)
         
@@ -404,7 +409,8 @@ def serve_wav():
         # Fallback: No image nor video provided - do only tts
         x = tts_multi_sentence(text=text,
                             precomputed_style_vector=precomputed_style_vector, 
-                            voice=args.voice)
+                            voice=args.voice,
+                            speed=args.speed)
         
         OUT_FILE = './flask_cache/tmp.wav' #args.out_file + '.wav'
         soundfile.write(OUT_FILE, x, 24000)
