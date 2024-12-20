@@ -82,3 +82,11 @@ python tts.py --text assets/LLM_description.txt --image assets/image_from_T31.jp
 [![Captions To Video](assets/caption_to_video_thumb.png)](https://youtu.be/EjZpa8NI_gA)
 
 
+**AudioBook**
+
+Audiobook `.wav` file will be saved in `./tts_audiobooks/`
+
+```python
+# Narrate assets/INCLUSION_IN_MUSEUMS_audiobook.docx
+python audiobook.py
+```
