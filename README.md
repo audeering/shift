@@ -33,7 +33,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=./hf_home CUDA_VISIBLE_DEVICES=0 python api
 
 ## Inference
 
-Examples below need `api.py` to be already running. If `api.py` runs on a different machine, [use the IP shown in the terminal](https://github.com/audeering/shift/blob/main/tts.py#L85) of `api.py`.
+All following examples need `api.py` to be already running. [Set this IP](https://github.com/audeering/shift/blob/main/tts.py#L85) to the IP shown in the terminal of `api.py`.
 
 
 **Text To Speech**

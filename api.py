@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import soundfile
-import text_utils
+
 import msinference
 import re
 import srt
@@ -10,6 +10,7 @@ import cv2
 import markdown
 import nltk
 
+from Utils import text_utils
 from pathlib import Path
 from types import SimpleNamespace
 from flask import Flask, request, send_from_directory
